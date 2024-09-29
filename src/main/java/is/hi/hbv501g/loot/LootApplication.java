@@ -73,11 +73,6 @@ public class CardController {
 }
 */
 /*
- Database Configuration
+ TODO : Database Configuration
 Ensure that our application.properties file in src/main/resources/ is configured to point to your database (e.g., PSQL).
-
-spring.datasource.url=jdbc:mysql://localhost:3306/loot   #railway.app database config needed
-spring.datasource.username=root
-spring.datasource.password=your_password
-spring.jpa.hibernate.ddl-auto=update
 */
