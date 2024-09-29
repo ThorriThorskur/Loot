@@ -27,7 +27,7 @@ buildSrc/build
 spring-test/test-output/
 
 # Maven artifacts
-pom.xml
+#pom.xml #should be included not ignored
 /target/
 
 # Eclipse artifacts, including WTP generated manifests
