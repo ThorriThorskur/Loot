@@ -1,0 +1,8 @@
+package is.hi.hbv501g.loot.repository;
+
+import is.hi.hbv501g.loot.Entity.User;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UserRepository extends JpaRepository<User, Long>{
+}
