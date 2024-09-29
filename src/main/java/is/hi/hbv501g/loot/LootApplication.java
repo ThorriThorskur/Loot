@@ -12,6 +12,23 @@ public class LootApplication {
 
 }
 
+
+
+/*Note: controllers 
+Define Controllers: Create a controller class annotated with @RestController. This is where you’ll define your endpoints.
+
+Service Layer: Add a service layer if you want to separate business logic from the controller. This is usually annotated with @Service.
+
+DTOs and Models: Define Data Transfer Objects (DTOs) and models that you’ll return or accept through the API.
+
+Repository Layer: If you are using a database, create a repository interface annotated with @Repository and use Spring Data JPA to manage database interactions.
+
+*/
+
+
+
+
+
 /*TODO :Create Models (Entities)   If you're working with a database, define your data structure. 
  //you could create entities like Card, Player, or Inventory.
 @Entity
@@ -72,6 +89,10 @@ public class CardController {
     }
 }
 */
+
+
+
+
 /*
  TODO : Database Configuration
 Ensure that our application.properties file in src/main/resources/ is configured to point to your database (e.g., PSQL).
