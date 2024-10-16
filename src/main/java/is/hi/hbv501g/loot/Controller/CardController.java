@@ -3,6 +3,7 @@ package is.hi.hbv501g.loot.Controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import is.hi.hbv501g.loot.Entity.Card;
+import is.hi.hbv501g.loot.Entity.Inventory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,13 +21,15 @@ import java.util.List;
 
 @Controller
 public class CardController {
-
     @Autowired
     private RestTemplate restTemplate;
+
+    private Inventory inventory = new Inventory("My Inventory"); // Temporary Inventory instance
 
     @GetMapping("/search")
     public String showSearchForm(Model model) {
         model.addAttribute("query", "");
+        model.addAttribute("inventory", inventory);
         return "search";
     }
 
@@ -37,30 +40,21 @@ public class CardController {
             return "search";
         }
 
-        // Format the query
         query = "name:\"" + query.trim() + "\"";
-
         String url = "https://api.scryfall.com/cards/search";
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
                 .queryParam("q", query);
 
-        // Build and encode the URI
         URI uri = builder.build().encode().toUri();
-
-        // Log the request URI
         System.out.println("Requesting URI: " + uri.toString());
 
         try {
-            // Use the URI object here
             ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
-
             String responseBody = response.getBody();
 
-            // Parse the JSON response
             ObjectMapper mapper = new ObjectMapper();
             List<Card> cards = new ArrayList<>();
             JsonNode root = mapper.readTree(responseBody);
-
             if (root.has("data")) {
                 JsonNode data = root.get("data");
                 for (JsonNode node : data) {
@@ -68,6 +62,7 @@ public class CardController {
                     cards.add(card);
                 }
                 model.addAttribute("cards", cards);
+                model.addAttribute("inventory", inventory);
                 return "results";
             } else if (root.has("object") && "error".equals(root.get("object").asText())) {
                 String errorMessage = root.get("details").asText();
@@ -78,7 +73,6 @@ public class CardController {
                 return "search";
             }
         } catch (HttpClientErrorException e) {
-            // Handle HTTP errors from the Scryfall API
             String responseBody = e.getResponseBodyAsString();
             ObjectMapper mapper = new ObjectMapper();
             try {
@@ -90,11 +84,33 @@ public class CardController {
             }
             return "search";
         } catch (Exception e) {
-            // Handle other exceptions
             model.addAttribute("error", "An unexpected error occurred.");
-            e.printStackTrace(); // Optional: Log the exception for debugging
+            e.printStackTrace();
             return "search";
         }
+    }
+
+    @PostMapping("/addCardToInventory")
+    public String addCardToInventory(@RequestParam String cardName, Model model) {
+        System.out.println("Adding card to inventory: " + cardName);
+        Card cardToAdd = null;
+        for (Card card : inventory.getCards()) {
+            System.out.println("Checking card: " + card.getName());
+            if (card.getName().equalsIgnoreCase(cardName)) {
+                cardToAdd = card;
+                break;
+            }
+        }
+        if (cardToAdd == null) {
+            System.out.println("Card not found in existing inventory, adding new card.");
+            cardToAdd = new Card();
+            cardToAdd.setName(cardName);
+            inventory.addCard(cardToAdd);
+        } else {
+            System.out.println("Card already in inventory.");
+        }
+        model.addAttribute("inventory", inventory);
+        return "inventory"; // Ensure you have a view to display the inventory
     }
 
 }
