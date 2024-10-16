@@ -21,6 +21,13 @@
                 <input type="hidden" name="cardName" th:value="${card.name}" />
                 <button type="submit">Add to Inventory</button>
             </form>
+            <!-- Display the card image -->
+            <div th:if="${card.imageUrl != null}">
+                <img th:src="${card.imageUrl}" alt="Card Image" />
+            </div>
+            <div th:unless="${card.imageUrl != null}">
+                <p>No image available.</p>
+            </div>
             <hr/>
         </li>
     </ul>
