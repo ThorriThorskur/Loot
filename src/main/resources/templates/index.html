@@ -1,31 +1,21 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Loot Application</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        h1 {
-            color: #333;
-            font-size: 36px;
-            text-align: center;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-    </style>
+  <title>User Management</title>
 </head>
 <body>
-    <h1 th:text="${message}">Welcome to Loot Application</h1>
+<h1>User Management</h1>
+<a href="/adduser">Add User</a>
+<table border="1">
+  <tr>
+    <th>ID</th><th>Name</th><th>Email</th><th>Actions</th>
+  </tr>
+  <tr th:each="user : ${users}">
+    <td th:text="${user.id}">1</td>
+    <td th:text="${user.name}">Name</td>
+    <td th:text="${user.email}">Email</td>
+    <td><a th:href="@{'/deleteuser/' + ${user.id}}">Delete</a></td>
+  </tr>
+</table>
 </body>
 </html>

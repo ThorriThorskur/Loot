@@ -10,6 +10,7 @@ public class LootApplication {
         SpringApplication.run(LootApplication.class, args);
     }
 
+
 }
 
 
