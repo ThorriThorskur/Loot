@@ -1,33 +1,25 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Search Results</title>
+    <title>Inventory</title>
 </head>
 <body>
-<h1>Search Results</h1>
+<h1>Inventory</h1>
 <p><a th:href="@{/search}">Back to search</a></p>
-
-<div th:if="${cards.size()} == 0">
-    <p>No cards found.</p>
+<div th:if="${inventory.cards.size()} == 0">
+    <p>Your inventory is empty.</p>
 </div>
-<div th:if="${cards.size()} > 0">
+<div th:if="${inventory.cards.size()} > 0">
     <ul>
-        <li th:each="card : ${cards}">
+        <li th:each="card : ${inventory.cards}">
             <h2 th:text="${card.name}"></h2>
             <p><strong>Mana Cost:</strong> <span th:text="${card.mana_cost}">N/A</span></p>
             <p><strong>Type:</strong> <span th:text="${card.type_line}">N/A</span></p>
             <p><strong>Oracle Text:</strong> <span th:text="${card.oracle_text}">N/A</span></p>
-            <form th:action="@{/addCardToInventory}" method="post">
+            <form th:action="@{/addCardToDeck}" method="post">
                 <input type="hidden" name="cardName" th:value="${card.name}" />
-                <button type="submit">Add to Inventory</button>
+                <button type="submit">Add to Deck</button>
             </form>
-            <!-- Display the card image -->
-            <div th:if="${card.imageUrl != null}">
-                <img th:src="${card.imageUrl}" alt="Card Image" />
-            </div>
-            <div th:unless="${card.imageUrl != null}">
-                <p>No image available.</p>
-            </div>
             <hr/>
         </li>
     </ul>
