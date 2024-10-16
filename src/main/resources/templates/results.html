@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Search Results</title>
+</head>
+<body>
+<h1>Search Results</h1>
+<p><a th:href="@{/search}">Back to search</a></p>
+
+<div th:if="${cards.size()} == 0">
+    <p>No cards found.</p>
+</div>
+<div th:if="${cards.size()} > 0">
+    <ul>
+        <li th:each="card : ${cards}">
+            <h2 th:text="${card.name}"></h2>
+            <p><strong>Mana Cost:</strong> <span th:text="${card.mana_cost}">N/A</span></p>
+            <p><strong>Type:</strong> <span th:text="${card.type_line}">N/A</span></p>
+            <p><strong>Oracle Text:</strong> <span th:text="${card.oracle_text}">N/A</span></p>
+            <hr/>
+        </li>
+    </ul>
+</div>
+</body>
+</html>
