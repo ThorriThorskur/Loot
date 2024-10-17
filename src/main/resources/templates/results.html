@@ -19,8 +19,10 @@
             <p><strong>Oracle Text:</strong> <span th:text="${card.oracle_text}">N/A</span></p>
             <form th:action="@{/addCardToInventory}" method="post">
                 <input type="hidden" name="cardName" th:value="${card.name}" />
+                <input type="hidden" name="imageUrl" th:value="${card.imageUrl}" />
                 <button type="submit">Add to Inventory</button>
             </form>
+
             <!-- Display the card image -->
             <div th:if="${card.imageUrl != null}">
                 <img th:src="${card.imageUrl}" alt="Card Image" />

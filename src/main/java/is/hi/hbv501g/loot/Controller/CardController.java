@@ -3,10 +3,9 @@ package is.hi.hbv501g.loot.Controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import is.hi.hbv501g.loot.Entity.Card;
-import is.hi.hbv501g.loot.Entity.Inventory;
+import is.hi.hbv501g.loot.Service.InventoryService;
+import is.hi.hbv501g.loot.repository.InventoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,7 +14,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,12 +22,13 @@ public class CardController {
     @Autowired
     private RestTemplate restTemplate;
 
-    private Inventory inventory = new Inventory("My Inventory"); // Temporary Inventory instance
+    @Autowired
+    private InventoryService inventoryService; // Use the InventoryService
 
     @GetMapping("/search")
     public String showSearchForm(Model model) {
         model.addAttribute("query", "");
-        model.addAttribute("inventory", inventory);
+        model.addAttribute("inventory", inventoryService.getInventory());
         return "search";
     }
 
@@ -58,30 +57,26 @@ public class CardController {
             if (root.has("data")) {
                 JsonNode data = root.get("data");
                 for (JsonNode node : data) {
-                    Card card = mapper.treeToValue(node, Card.class);
+                    Card card = new Card();
+                    card.setName(node.get("name").asText());
+                    card.setMana_cost(node.has("mana_cost") ? node.get("mana_cost").asText() : "N/A");
+                    card.setType_line(node.has("type_line") ? node.get("type_line").asText() : "N/A");
+                    card.setOracle_text(node.has("oracle_text") ? node.get("oracle_text").asText() : "N/A");
+                    if (node.has("image_uris")) {
+                        card.setImageUrl(node.get("image_uris").get("normal").asText());
+                    }
+
                     cards.add(card);
                 }
                 model.addAttribute("cards", cards);
-                model.addAttribute("inventory", inventory);
+                model.addAttribute("inventory", inventoryService.getInventory());
                 return "results";
-            } else if (root.has("object") && "error".equals(root.get("object").asText())) {
-                String errorMessage = root.get("details").asText();
-                model.addAttribute("error", errorMessage);
-                return "search";
             } else {
                 model.addAttribute("error", "Unexpected response from Scryfall API.");
                 return "search";
             }
         } catch (HttpClientErrorException e) {
-            String responseBody = e.getResponseBodyAsString();
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                JsonNode root = mapper.readTree(responseBody);
-                String errorMessage = root.has("details") ? root.get("details").asText() : "Unknown error occurred.";
-                model.addAttribute("error", errorMessage);
-            } catch (Exception ex) {
-                model.addAttribute("error", "Error parsing error response from Scryfall API.");
-            }
+            model.addAttribute("error", "Error fetching cards.");
             return "search";
         } catch (Exception e) {
             model.addAttribute("error", "An unexpected error occurred.");
@@ -91,26 +86,28 @@ public class CardController {
     }
 
     @PostMapping("/addCardToInventory")
-    public String addCardToInventory(@RequestParam String cardName, Model model) {
+    public String addCardToInventory(@RequestParam String cardName, @RequestParam String imageUrl) {
         System.out.println("Adding card to inventory: " + cardName);
-        Card cardToAdd = null;
-        for (Card card : inventory.getCards()) {
-            System.out.println("Checking card: " + card.getName());
-            if (card.getName().equalsIgnoreCase(cardName)) {
-                cardToAdd = card;
-                break;
-            }
-        }
-        if (cardToAdd == null) {
-            System.out.println("Card not found in existing inventory, adding new card.");
-            cardToAdd = new Card();
-            cardToAdd.setName(cardName);
-            inventory.addCard(cardToAdd);
-        } else {
-            System.out.println("Card already in inventory.");
-        }
-        model.addAttribute("inventory", inventory);
-        return "inventory"; // Ensure you have a view to display the inventory
+        Card card = new Card();
+        card.setName(cardName);
+        card.setImageUrl(imageUrl);
+        inventoryService.addCard(card); // Use InventoryService instead
+
+        return "redirect:/inventory"; // Redirect doesn't need model
     }
 
+    @PostMapping("/removeCardFromInventory")
+    public String removeCardFromInventory(@RequestParam Long cardId) {
+        System.out.println("Removing card from inventory with ID: " + cardId);
+        inventoryService.removeCard(cardId); // Use InventoryService instead
+
+        return "redirect:/inventory"; // Redirect doesn't need model
+    }
+
+    @GetMapping("/inventory")
+    public String showInventory(Model model) {
+        model.addAttribute("inventory", inventoryService.getInventory());
+        return "inventory";
+    }
 }
+

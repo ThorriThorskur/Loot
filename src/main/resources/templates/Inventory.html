@@ -6,23 +6,27 @@
 <body>
 <h1>Inventory</h1>
 <p><a th:href="@{/search}">Back to search</a></p>
-<div th:if="${inventory.cards.size()} == 0">
+<div th:if="${inventory.size()} == 0">
     <p>Your inventory is empty.</p>
 </div>
-<div th:if="${inventory.cards.size()} > 0">
+<div th:if="${inventory.size()} > 0">
     <ul>
-        <li th:each="card : ${inventory.cards}">
+        <li th:each="card : ${inventory}">
             <h2 th:text="${card.name}"></h2>
-            <p><strong>Mana Cost:</strong> <span th:text="${card.mana_cost}">N/A</span></p>
-            <p><strong>Type:</strong> <span th:text="${card.type_line}">N/A</span></p>
-            <p><strong>Oracle Text:</strong> <span th:text="${card.oracle_text}">N/A</span></p>
-            <form th:action="@{/addCardToDeck}" method="post">
-                <input type="hidden" name="cardName" th:value="${card.name}" />
-                <button type="submit">Add to Deck</button>
+            <div th:if="${card.imageUrl != null}">
+                <img th:src="${card.imageUrl}" alt="Card Image" />
+            </div>
+            <div th:unless="${card.imageUrl != null}">
+                <p>No image available.</p>
+            </div>
+            <form th:action="@{/removeCardFromInventory}" method="post">
+                <input type="hidden" name="cardId" th:value="${card.id}" />
+                <button type="submit">Remove from Inventory</button>
             </form>
             <hr/>
         </li>
     </ul>
 </div>
+
 </body>
 </html>
