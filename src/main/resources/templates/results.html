@@ -5,32 +5,27 @@
 </head>
 <body>
 <h1>Search Results</h1>
-<p><a th:href="@{/search}">Back to search</a></p>
-
-<div th:if="${cards.size()} == 0">
-    <p>No cards found.</p>
-</div>
-<div th:if="${cards.size()} > 0">
-    <ul>
-        <li th:each="card : ${cards}">
-            <h2 th:text="${card.name}"></h2>
-            <p><strong>Mana Cost:</strong> <span th:text="${card.mana_cost}">N/A</span></p>
-            <p><strong>Type:</strong> <span th:text="${card.type_line}">N/A</span></p>
-            <p><strong>Oracle Text:</strong> <span th:text="${card.oracle_text}">N/A</span></p>
-            <form th:action="@{/addCardToInventory}" method="post">
-                <input type="hidden" name="cardName" th:value="${card.name}" />
-                <button type="submit">Add to Inventory</button>
-            </form>
-            <!-- Display the card image -->
-            <div th:if="${card.imageUrl != null}">
-                <img th:src="${card.imageUrl}" alt="Card Image" />
-            </div>
-            <div th:unless="${card.imageUrl != null}">
-                <p>No image available.</p>
-            </div>
-            <hr/>
-        </li>
-    </ul>
-</div>
+<ul>
+    <li th:each="card : ${cards}">
+        <h2 th:text="${card.name}"></h2>
+        <p><strong>Mana Cost:</strong> <span th:text="${card.mana_cost}">N/A</span></p>
+        <p><strong>Type:</strong> <span th:text="${card.type_line}">N/A</span></p>
+        <p><strong>Oracle Text:</strong> <span th:text="${card.oracle_text}">N/A</span></p>
+        <!-- Display the card image -->
+        <div th:if="${card.imageUrl != null}">
+            <img th:src="${card.imageUrl}" alt="Card Image" />
+        </div>
+        <div th:unless="${card.imageUrl != null}">
+            <p>No image available.</p>
+        </div>
+        <!-- Add to inventory form -->
+        <form th:action="@{/addCardToInventory}" method="post">
+            <input type="hidden" name="cardId" th:value="${card.id}" />
+            <input type="hidden" name="userId" th:value="${userId}" />
+            <button type="submit">Add to Inventory</button>
+        </form>
+        <hr/>
+    </li>
+</ul>
 </body>
 </html>

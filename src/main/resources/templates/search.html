@@ -1,17 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>MTG Card Search</title>
+    <title>Search Cards</title>
 </head>
 <body>
-<h1>Search for MTG Cards</h1>
+<h1>Search for Cards</h1>
 <form th:action="@{/search}" method="post">
-    <label for="query">Search Query:</label>
-    <input type="text" id="query" name="query" th:value="${query}" required />
+    <input type="hidden" name="userId" th:value="${userId}" />
+    <input type="text" name="query" placeholder="Enter card name" required />
     <button type="submit">Search</button>
 </form>
-<div th:if="${error != null}">
-    <p style="color:red;" th:text="${error}"></p>
-</div>
 </body>
 </html>
