@@ -1,5 +1,3 @@
-// File: src/main/java/is/hi/hbv501g/loot/Controller/WebController.java
-
 package is.hi.hbv501g.loot.Controller;
 
 import is.hi.hbv501g.loot.Entity.UserEntity;
@@ -9,36 +7,41 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Controller
-public class UserController{
+public class UserController {
 
     @Autowired
     private UserService userService;
 
+    // New method to handle root URL
     @GetMapping("/")
-    public String index(Model model) {
-        List<UserEntity> users = userService.findAll();
-        model.addAttribute("users", users);
-        return "index";
+    public String home(Model model) {
+        model.addAttribute("users", userService.findAll());
+        return "user_management";
+    }
+
+    @GetMapping("/usermanagement")
+    public String listUsers(Model model) {
+        model.addAttribute("users", userService.findAll());
+        return "user_management";
     }
 
     @GetMapping("/adduser")
     public String addUserForm(Model model) {
         model.addAttribute("user", new UserEntity());
-        return "adduser";
+        return "add_user";
     }
 
     @PostMapping("/adduser")
-    public String addUserSubmit(@ModelAttribute UserEntity user) {
+    public String addUser(@ModelAttribute UserEntity user, Model model) {
         userService.save(user);
-        return "redirect:/";
+        return "redirect:/usermanagement";
     }
 
     @GetMapping("/deleteuser/{id}")
-    public String deleteUser(@PathVariable Long id) {
+    public String deleteUser(@PathVariable("id") long id, Model model) {
         userService.deleteById(id);
-        return "redirect:/";
+        return "redirect:/usermanagement";
     }
+
 }
