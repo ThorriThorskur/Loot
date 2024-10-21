@@ -11,6 +11,8 @@ public class UserEntity {
 
     private String name;
     private String email;
+    private String password;
+    private String role;
 
     @OneToOne(cascade = CascadeType.ALL)
     private Inventory inventory;
@@ -40,6 +42,14 @@ public class UserEntity {
         return email;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
     public Inventory getInventory() {
         return inventory;
     }
@@ -54,6 +64,14 @@ public class UserEntity {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public void setInventory(Inventory inventory) {
