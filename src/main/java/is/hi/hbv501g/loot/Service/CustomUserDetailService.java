@@ -2,13 +2,13 @@ package is.hi.hbv501g.loot.Service;
 
 import is.hi.hbv501g.loot.Entity.UserEntity;
 import is.hi.hbv501g.loot.repository.UserRepository;
-import org.springframework.security.core.userdetails.UserDetailService;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CustomUserDetailService implements UserDetailService {
+public class CustomUserDetailService implements UserDetailsService {
     private final UserRepository userRepository;
 
     public CustomUserDetailService(UserRepository userRepository) {
@@ -16,7 +16,7 @@ public class CustomUserDetailService implements UserDetailService {
     }
 
     @Override
-    public UserDetails findUserByName(String name) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
         UserEntity user = userRepository.findByName(name);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
