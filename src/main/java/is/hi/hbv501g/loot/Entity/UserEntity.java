@@ -13,6 +13,7 @@ public class UserEntity {
     private String email;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "inventory_id", referencedColumnName = "id") // Foreign key to Inventory
     private Inventory inventory;
 
     // No-argument constructor

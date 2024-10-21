@@ -16,6 +16,10 @@ public class Inventory {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Card> cards;
 
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id") // Foreign key to UserEntity
+    private UserEntity user;
+
     // No-argument constructor
     public Inventory() {
         this.cards = new ArrayList<>();

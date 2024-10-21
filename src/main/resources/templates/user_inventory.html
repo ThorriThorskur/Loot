@@ -14,9 +14,6 @@
     <ul>
         <li th:each="card : ${user.inventory.cards}">
             <h2 th:text="${card.name}"></h2>
-            <p><strong>Mana Cost:</strong> <span th:text="${card.mana_cost}">N/A</span></p>
-            <p><strong>Type:</strong> <span th:text="${card.type_line}">N/A</span></p>
-            <p><strong>Oracle Text:</strong> <span th:text="${card.oracle_text}">N/A</span></p>
             <p><strong>Price:</strong>
                 <span th:text="${card.usd != null ? '$' + card.usd : 'N/A'}">N/A</span>
             </p>

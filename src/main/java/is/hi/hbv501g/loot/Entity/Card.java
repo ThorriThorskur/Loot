@@ -23,7 +23,8 @@ public class Card {
     @Transient
     private String usd_foil;
 
-    @Lob
+    @Lob  // Use @Lob to store larger text data
+    @Column(columnDefinition = "TEXT")  // Optional: explicitly define column as TEXT
     private String oracle_text;
 
     private String imageUrl;

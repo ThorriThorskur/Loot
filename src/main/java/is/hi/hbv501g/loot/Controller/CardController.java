@@ -3,14 +3,15 @@ package is.hi.hbv501g.loot.Controller;
 import is.hi.hbv501g.loot.Entity.Card;
 import is.hi.hbv501g.loot.Entity.Inventory;
 import is.hi.hbv501g.loot.Entity.UserEntity;
+import is.hi.hbv501g.loot.Service.CardService;
 import is.hi.hbv501g.loot.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class CardController {
@@ -19,64 +20,85 @@ public class CardController {
     private UserService userService;
 
     @Autowired
-    private RestTemplate restTemplate;
+    private CardService cardService; // Inject the new CardService
 
+    /**
+     * Displays the search page.
+     * @param userId User ID for the current user.
+     * @param model  Model to store attributes.
+     * @return The search view.
+     */
     @GetMapping("/search")
     public String searchCards(@RequestParam("userId") Long userId, Model model) {
         model.addAttribute("userId", userId);
         return "search";
     }
 
+    /**
+     * Handles the card search request from the user.
+     * @param query  The search query.
+     * @param userId The ID of the user performing the search.
+     * @param model  Model to store attributes for the view.
+     * @return The results view.
+     */
     @PostMapping("/search")
     public String performSearch(@RequestParam("query") String query, @RequestParam("userId") Long userId, Model model) {
-        String url = "https://api.scryfall.com/cards/search?q=" + query;
-        Map<String, Object> response = restTemplate.getForObject(url, Map.class);
-
-        List<Card> cards = new ArrayList<>();
-        if (response != null && response.containsKey("data")) {
-            List<Map<String, Object>> data = (List<Map<String, Object>>) response.get("data");
-            for (Map<String, Object> cardData : data) {
-                Card card = restTemplate.getForObject((String) cardData.get("uri"), Card.class);
-                cards.add(card);
-            }
-        }
-
+        // Use CardService to search cards
+        List<Card> cards = cardService.searchCards(query);
         model.addAttribute("cards", cards);
         model.addAttribute("userId", userId);
         return "results";
     }
 
+    /**
+     * Adds a card to the user's inventory.
+     * @param cardId The ID of the card to add.
+     * @param userId The ID of the user whose inventory is being updated.
+     * @param model  Model to store attributes for the view.
+     * @return Redirects to the user's inventory view.
+     */
     @PostMapping("/addCardToInventory")
     public String addCardToInventory(@RequestParam("cardId") String cardId, @RequestParam("userId") Long userId, Model model) {
+        // Fetch the user and inventory
         Optional<UserEntity> userOptional = userService.findById(userId);
         if (!userOptional.isPresent()) {
             model.addAttribute("error", "User not found.");
             return "error";
         }
+
         UserEntity user = userOptional.get();
         Inventory inventory = user.getInventory();
 
-        // Fetch card details from Scryfall API
-        String url = "https://api.scryfall.com/cards/" + cardId;
-        Card card = restTemplate.getForObject(url, Card.class);
+        // Use CardService to fetch card details (from cache or API)
+        Card card = cardService.fetchCardById(cardId);
 
-        // Add card to inventory
+        // Add the card to the user's inventory and save the user
         inventory.addCard(card);
         userService.save(user);
 
         return "redirect:/user/" + userId + "/inventory";
     }
 
+    /**
+     * Removes a card from the user's inventory.
+     * @param cardId The ID of the card to remove.
+     * @param userId The ID of the user whose inventory is being updated.
+     * @param model  Model to store attributes for the view.
+     * @return Redirects to the user's inventory view.
+     */
     @PostMapping("/removeCardFromInventory")
     public String removeCardFromInventory(@RequestParam("cardId") String cardId, @RequestParam("userId") Long userId, Model model) {
+        // Fetch the user and inventory
         Optional<UserEntity> userOptional = userService.findById(userId);
         if (!userOptional.isPresent()) {
             model.addAttribute("error", "User not found.");
             return "error";
         }
+
         UserEntity user = userOptional.get();
         Inventory inventory = user.getInventory();
 
+        // Remove the card from the inventory and save the user
         inventory.getCards().removeIf(card -> card.getId().equals(cardId));
         userService.save(user);
 
