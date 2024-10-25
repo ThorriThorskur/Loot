@@ -15,9 +15,8 @@ public class UserController {
 
     // New method to handle root URL
     @GetMapping("/")
-    public String home(Model model) {
-        model.addAttribute("users", userService.findAll());
-        return "user_management";
+    public String home() {
+        return "index";
     }
 
     @GetMapping("/usermanagement")

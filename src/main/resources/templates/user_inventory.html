@@ -4,7 +4,7 @@
     <title>User Inventory</title>
 </head>
 <body>
-<h1 th:text="'Inventory of ' + ${user.name}"></h1>
+<h1 th:text="'Inventory of ' + ${user.username}"></h1>
 <p><a th:href="@{'/search?userId=' + ${user.id}}">Search for Cards</a></p>
 
 <div th:if="${user.inventory.cards.size()} == 0">
