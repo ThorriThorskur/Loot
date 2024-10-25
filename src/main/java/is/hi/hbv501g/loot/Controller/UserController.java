@@ -3,6 +3,8 @@ package is.hi.hbv501g.loot.Controller;
 import is.hi.hbv501g.loot.Entity.UserEntity;
 import is.hi.hbv501g.loot.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,26 +17,26 @@ public class UserController {
 
     // New method to handle root URL
     @GetMapping("/")
-    public String home() {
+    public String index(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        model.addAttribute("userDetails", userDetails);
         return "index";
     }
 
-    @GetMapping("/usermanagement")
+    @GetMapping("/profile")
+    public String userProfile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+
+        UserEntity user = userService.findByUsername(userDetails.getUsername()).orElse(null);
+
+        //TODO: in profile html show card invenentory.
+
+        model.addAttribute("user", user);
+        return "profile"; // Render the profile page
+    }
+
+    @GetMapping("/user_management")
     public String listUsers(Model model) {
         model.addAttribute("users", userService.findAll());
         return "user_management";
-    }
-
-    @GetMapping("/adduser")
-    public String addUserForm(Model model) {
-        model.addAttribute("user", new UserEntity());
-        return "add_user";
-    }
-
-    @PostMapping("/adduser")
-    public String addUser(@ModelAttribute UserEntity user, Model model) {
-        userService.save(user);
-        return "redirect:/usermanagement";
     }
 
     @GetMapping("/deleteuser/{id}")

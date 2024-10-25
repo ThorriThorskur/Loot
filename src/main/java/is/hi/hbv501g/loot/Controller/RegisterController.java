@@ -3,6 +3,7 @@ package is.hi.hbv501g.loot.Controller;
 import is.hi.hbv501g.loot.Entity.UserEntity;
 import is.hi.hbv501g.loot.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,9 @@ public class RegisterController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
@@ -28,6 +32,7 @@ public class RegisterController {
             return "register";
         }
 
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userService.save(user); // Save the user
         return "redirect:/login?success"; // Redirect to login page after successful signup
     }

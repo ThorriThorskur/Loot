@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>User Profile</title>
+</head>
+<body>
+<h1>User Profile</h1>
+
+<div th:if="${user != null}">
+  <p>Username: <span th:text="${user.username}"></span></p>
+  <p>ID: <span th:text="${user.id}"></span></p> <!-- Assuming you have an email field -->
+</div>
+
+<div th:if="${user == null}">
+  <p>No user information available.</p>
+</div>
+</body>
+</html>

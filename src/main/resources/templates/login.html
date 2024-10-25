@@ -5,12 +5,17 @@
 </head>
 <body>
 <h1>Login</h1>
+
+<!-- Display error message if present -->
+<div th:if="${error != null}" style="color: red;">
+  <p th:text="${error}"></p>
+</div>
+
 <form th:action="@{/login}" method="post">
   <p>Username: <input type="text" name="username" /></p>
   <p>Password: <input type="text" name="password" /></p>
-  <button type="submit">Login</button>
-
-  <p th:if="${error != null}" th:text="${error}"></p>
+  <p><button type="submit">Login</button></p>
+  <a href="/">go back</a>
 </form>
 </body>
 </html>

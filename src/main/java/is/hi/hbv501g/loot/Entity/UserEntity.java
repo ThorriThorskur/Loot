@@ -54,7 +54,7 @@ public class UserEntity {
     }
 
     public void setPassword(String password) {
-        this.password = new BCryptPasswordEncoder().encode(password);
+        this.password = password;
     }
 
     public void setInventory(Inventory inventory) {

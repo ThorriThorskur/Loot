@@ -5,8 +5,12 @@
 </head>
 <body>
 <h1>Home</h1>
-<a href="/login">Login</a>
-<a href="/profile">Profile</a>
+<a th:if="${userDetails == null}" href="/login">Login</a>
+<a th:if="${userDetails != null}" href="/profile">Profile</a>
+<form th:if="${userDetails != null}" action="/logout" method="post" style="display:inline;">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <button type="submit">Logout</button>
+</form>
 <a href="/search">Search Cards</a>
 <a href="/register">Register</a>
 <a href="/user_management">User Management</a>
