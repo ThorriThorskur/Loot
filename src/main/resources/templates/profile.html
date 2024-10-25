@@ -8,7 +8,8 @@
 
 <div th:if="${user != null}">
   <p>Username: <span th:text="${user.username}"></span></p>
-  <p>ID: <span th:text="${user.id}"></span></p> <!-- Assuming you have an email field -->
+  <p>ID: <span th:text="${user.id}"></span></p>
+  <p><a th:href="@{/user/{userId}/inventory(userId=${user.id})}" class="button">Collection</a></p>
 </div>
 
 <div th:if="${user == null}">

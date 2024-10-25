@@ -49,13 +49,13 @@ public class CardController {
     }
 
     @PostMapping("/addCardToInventory")
-    public String addCardToInventory(@RequestParam("cardId") String cardId, @RequestParam("userId") Long userId, Model model) {
-        Optional<UserEntity> userOptional = userService.findById(userId);
-        if (!userOptional.isPresent()) {
+    public String addCardToInventory(@RequestParam("cardId") String cardId, @AuthenticationPrincipal UserDetails userDetails, Model model) {
+        UserEntity user = userService.findByUsername(userDetails.getUsername()).orElse(null);
+        if (user == null) {
             model.addAttribute("error", "User not found.");
             return "error";
         }
-        UserEntity user = userOptional.get();
+
         Inventory inventory = user.getInventory();
 
         // Fetch card details from Scryfall API
@@ -66,22 +66,22 @@ public class CardController {
         inventory.addCard(card);
         userService.save(user);
 
-        return "redirect:/user/" + userId + "/inventory";
+        return "redirect:/user/" + user.getId() + "/inventory";
     }
 
     @PostMapping("/removeCardFromInventory")
-    public String removeCardFromInventory(@RequestParam("cardId") String cardId, @RequestParam("userId") Long userId, Model model) {
-        Optional<UserEntity> userOptional = userService.findById(userId);
-        if (!userOptional.isPresent()) {
+    public String removeCardFromInventory(@RequestParam("cardId") String cardId, @AuthenticationPrincipal UserDetails userDetails, Model model) {
+        UserEntity user = userService.findByUsername(userDetails.getUsername()).orElse(null);
+        if (user == null) {
             model.addAttribute("error", "User not found.");
             return "error";
         }
-        UserEntity user = userOptional.get();
+
         Inventory inventory = user.getInventory();
 
         inventory.getCards().removeIf(card -> card.getId().equals(cardId));
         userService.save(user);
 
-        return "redirect:/user/" + userId + "/inventory";
+        return "redirect:/user/" + user.getId() + "/inventory";
     }
 }

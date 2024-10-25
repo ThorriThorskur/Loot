@@ -27,7 +27,7 @@ public class UserController {
 
         UserEntity user = userService.findByUsername(userDetails.getUsername()).orElse(null);
 
-        //TODO: in profile html show card invenentory.
+        //TODO: in profile html show card inventory.
 
         model.addAttribute("user", user);
         return "profile"; // Render the profile page
