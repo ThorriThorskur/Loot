@@ -5,8 +5,8 @@
 </head>
 <body>
 <h1>Search for Cards</h1>
+<p th:text="${username}"></p>
 <form th:action="@{/search}" method="post">
-    <input type="hidden" name="userId" th:value="${userId}" />
     <input type="text" name="query" placeholder="Enter card name" required />
     <button type="submit">Search</button>
 </form>

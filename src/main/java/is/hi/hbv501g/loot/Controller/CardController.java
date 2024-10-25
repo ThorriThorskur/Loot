@@ -5,6 +5,8 @@ import is.hi.hbv501g.loot.Entity.Inventory;
 import is.hi.hbv501g.loot.Entity.UserEntity;
 import is.hi.hbv501g.loot.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,13 +24,13 @@ public class CardController {
     private RestTemplate restTemplate;
 
     @GetMapping("/search")
-    public String searchCards(@RequestParam("userId") Long userId, Model model) {
-        model.addAttribute("userId", userId);
+    public String searchCards(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        model.addAttribute("username", userDetails.getUsername());
         return "search";
     }
 
     @PostMapping("/search")
-    public String performSearch(@RequestParam("query") String query, @RequestParam("userId") Long userId, Model model) {
+    public String performSearch(@RequestParam("query") String query, Model model) {
         String url = "https://api.scryfall.com/cards/search?q=" + query;
         Map<String, Object> response = restTemplate.getForObject(url, Map.class);
 
@@ -42,7 +44,7 @@ public class CardController {
         }
 
         model.addAttribute("cards", cards);
-        model.addAttribute("userId", userId);
+        //model.addAttribute("userId", userId);
         return "results";
     }
 

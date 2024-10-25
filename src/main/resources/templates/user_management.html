@@ -5,7 +5,6 @@
 </head>
 <body>
 <h1>User Management</h1>
-<a href="/adduser">Add User</a>
 
 <table border="1">
   <tr>
@@ -13,8 +12,8 @@
   </tr>
   <tr th:each="user : ${users}">
     <td th:text="${user.id}">1</td>
-    <td th:text="${user.name}">Name</td>
-    <td th:text="${user.email}">Email</td>
+    <td th:text="${user.username}">Username</td>
+    <td th:text="${user.password}">Password</td>
     <td>
       <a th:href="@{'/deleteuser/' + ${user.id}}">Delete</a> |
       <a th:href="@{'/user/' + ${user.id} + '/inventory'}">View Inventory</a> |
