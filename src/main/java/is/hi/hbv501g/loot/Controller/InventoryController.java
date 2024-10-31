@@ -7,6 +7,8 @@ import is.hi.hbv501g.loot.Entity.UserEntity;
 import is.hi.hbv501g.loot.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,14 +27,13 @@ public class InventoryController {
     @Autowired
     private RestTemplate restTemplate;
 
-    @GetMapping("/user/{userId}/inventory")
-    public String viewInventory(@PathVariable Long userId, Model model) {
-        Optional<UserEntity> userOptional = userService.findById(userId);
-        if (!userOptional.isPresent()) {
+    @GetMapping("/user/inventory")
+    public String viewInventory(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        UserEntity user = userService.findByUsername(userDetails.getUsername()).orElse(null);
+        if (user == null) {
             model.addAttribute("error", "User not found.");
             return "error";
         }
-        UserEntity user = userOptional.get();
 
         List<Card> cardsInInventory = user.getInventory().getCards();
 

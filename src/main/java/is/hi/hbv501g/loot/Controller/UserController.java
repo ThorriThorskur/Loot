@@ -22,27 +22,25 @@ public class UserController {
         return "index";
     }
 
-    @GetMapping("/profile")
+    @GetMapping("/user")
     public String userProfile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
 
         UserEntity user = userService.findByUsername(userDetails.getUsername()).orElse(null);
 
-        //TODO: in profile html show card inventory.
-
         model.addAttribute("user", user);
-        return "profile"; // Render the profile page
+        return "user"; // Render the profile page
     }
 
-    @GetMapping("/user_management")
+    @GetMapping("/user/admin")
     public String listUsers(Model model) {
         model.addAttribute("users", userService.findAll());
         return "user_management";
     }
 
-    @GetMapping("/deleteuser/{id}")
-    public String deleteUser(@PathVariable("id") long id, Model model) {
+    @GetMapping("/deleteuser/{userId}")
+    public String deleteUser(@PathVariable("userId") long id, Model model) {
         userService.deleteById(id);
-        return "redirect:/usermanagement";
+        return "redirect:/user_management";
     }
 
 }
