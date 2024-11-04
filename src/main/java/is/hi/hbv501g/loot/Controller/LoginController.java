@@ -25,10 +25,24 @@ public class LoginController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * Render the html template for login.html
+     *
+     * @return
+     */
     @GetMapping("/login")
     public String showLoginForm() {
         return "login"; // Render Thymeleaf template for registration
     }
+
+    /**
+     * Login through html template
+     *
+     * @param username Form in the html template for username
+     * @param password Form in the html template for password
+     * @param redirectAttributes Attributes for error handling
+     * @return
+     */
     @PostMapping("/login")
     public String login(@RequestParam("username") String username, @RequestParam("password") String password, RedirectAttributes redirectAttributes) {
         Optional<UserEntity> possibleUser = loginService.findByUsername(username);

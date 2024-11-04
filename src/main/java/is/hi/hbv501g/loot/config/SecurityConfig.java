@@ -4,6 +4,7 @@ import is.hi.hbv501g.loot.Service.LoginService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,11 +13,19 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
+
+    /**
+     * Configuration for login handling and logout handling as well as authentication
+     *
+     * @param http
+     * @return
+     * @throws Exception
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/register", "/").permitAll() // Allow access to login, registration and index
+                        .requestMatchers("/login", "/register", "/api/register" ,"/").permitAll() // Allow access to login, registration and index
                         .anyRequest().authenticated() // All other pages require authentication
                 )
                 .formLogin(form -> form
@@ -33,6 +42,11 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Connect a password encoder to the security configurations.
+     *
+     * @return
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

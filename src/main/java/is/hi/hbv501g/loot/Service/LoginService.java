@@ -21,6 +21,13 @@ public class LoginService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Method to get the user into a session
+     *
+     * @param username
+     * @return
+     * @throws UsernameNotFoundException
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserEntity user = userRepository.findByUsername(username)
@@ -29,6 +36,12 @@ public class LoginService implements UserDetailsService {
         return new User(user.getUsername(), user.getPassword(), new ArrayList<>());
     }
 
+    /**
+     * Method to get user details by username.
+     *
+     * @param username
+     * @return
+     */
     public Optional<UserEntity> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }

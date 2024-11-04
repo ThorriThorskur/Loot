@@ -15,13 +15,26 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // New method to handle root URL
+    /**
+     * Render the frontpage for the site
+     *
+     * @param userDetails Attributes for the current user in session if any
+     * @param model For adding the attributes from userDetails to the html template
+     * @return
+     */
     @GetMapping("/")
     public String index(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         model.addAttribute("userDetails", userDetails);
         return "index";
     }
 
+    /**
+     * Render the user page
+     *
+     * @param userDetails Attributes from the current user in session.
+     * @param model For adding the attributes from userDetails to the html template
+     * @return
+     */
     @GetMapping("/user")
     public String userProfile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
 
@@ -31,12 +44,19 @@ public class UserController {
         return "user"; // Render the profile page
     }
 
+    /**
+     * Render the admin page for viewing the database and editing all users.
+     *
+     * @param model For appearing the user details of all users.
+     * @return
+     */
     @GetMapping("/user/admin")
     public String listUsers(Model model) {
         model.addAttribute("users", userService.findAll());
         return "user_management";
     }
 
+    // TODO: Questionable function maybe find another way to delete users.
     @GetMapping("/deleteuser/{userId}")
     public String deleteUser(@PathVariable("userId") long id, Model model) {
         userService.deleteById(id);
