@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>User Deck</title>
+</head>
+<body>
+<h1 th:text="'Deck of ' + ${user.username}"></h1>
+
+<p>Total Cards in Deck: <span th:text="${deck.deckCards.size()}"></span>/50</p>
+
+<div th:if="${deck.deckCards.size()} == 0">
+    <p>Your deck is empty.</p>
+</div>
+<div th:if="${deck.deckCards.size()} > 0">
+    <ul>
+        <li th:each="deckCard : ${deck.deckCards}">
+            <h2 th:text="${deckCard.card.name}"></h2>
+            <p><strong>Mana Cost:</strong> <span th:text="${deckCard.card.manaCost}"></span></p>
+            <form th:action="@{/removeCardFromDeck}" method="post">
+                <input type="hidden" name="deckCardId" th:value="${deckCard.id}"/>
+                <button type="submit">Remove from Deck</button>
+            </form>
+            <hr/>
+        </li>
+    </ul>
+</div>
+
+<a th:href="@{/user/{userId}/inventory(userId=${user.id})}">Back to Inventory</a>
+
+</body>
+</html>

@@ -3,6 +3,7 @@ package is.hi.hbv501g.loot.Controller;
 import is.hi.hbv501g.loot.Entity.Card;
 import is.hi.hbv501g.loot.Entity.Inventory;
 import is.hi.hbv501g.loot.Entity.UserEntity;
+import is.hi.hbv501g.loot.Entity.InventoryCard;
 import is.hi.hbv501g.loot.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -58,11 +59,15 @@ public class CardController {
 
         Inventory inventory = user.getInventory();
 
-        // Fetch card details from Scryfall API
+        // Fetch card details from Scryfall API or repository
         String url = "https://api.scryfall.com/cards/" + cardId;
         Card card = restTemplate.getForObject(url, Card.class);
+        if (card == null) {
+            model.addAttribute("error", "Card not found.");
+            return "error";
+        }
 
-        // Add card to inventory
+        // Add card to inventory and save user
         inventory.addCard(card);
         userService.save(user);
 
@@ -79,9 +84,19 @@ public class CardController {
 
         Inventory inventory = user.getInventory();
 
-        inventory.getCards().removeIf(card -> card.getId().equals(cardId));
-        userService.save(user);
+        Optional<InventoryCard> optionalInventoryCard = inventory.getInventoryCards().stream()
+                .filter(inventoryCard -> inventoryCard.getCard().getId().equals(cardId))
+                .findFirst();
+
+        if (optionalInventoryCard.isPresent()) {
+            inventory.removeCard(optionalInventoryCard.get().getCard());
+            userService.save(user);
+        } else {
+            model.addAttribute("error", "Card not found in inventory.");
+            return "error";
+        }
 
         return "redirect:/user/" + user.getId() + "/inventory";
     }
+
 }

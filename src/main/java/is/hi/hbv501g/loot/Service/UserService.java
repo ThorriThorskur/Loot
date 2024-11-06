@@ -1,5 +1,6 @@
 package is.hi.hbv501g.loot.Service;
 
+import is.hi.hbv501g.loot.Entity.Inventory;
 import is.hi.hbv501g.loot.Entity.UserEntity;
 import is.hi.hbv501g.loot.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +12,11 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private InventoryService inventoryService;
 
     public List<UserEntity> findAll() {
         return userRepository.findAll();
@@ -35,6 +35,11 @@ public class UserService {
     }
 
     public UserEntity save(UserEntity user) {
+        // Save associated inventory if it exists
+        Inventory inventory = user.getInventory();
+        if (inventory != null) {
+            inventoryService.save(inventory);
+        }
         return userRepository.save(user);
     }
 

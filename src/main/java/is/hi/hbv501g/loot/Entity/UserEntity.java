@@ -1,20 +1,24 @@
 package is.hi.hbv501g.loot.Entity;
 
 import jakarta.persistence.*;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class UserEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     private String username;
     private String password;
 
     @OneToOne(cascade = CascadeType.ALL)
     private Inventory inventory;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Deck> decks = new ArrayList<>();
 
     // No-argument constructor
     public UserEntity() {
@@ -28,8 +32,8 @@ public class UserEntity {
         this.inventory = new Inventory(name + "'s Inventory");
     }
 
-    // Getters and Setters
-    public long getId() {
+    // Getters and setters
+    public Long getId() {
         return id;
     }
 
@@ -37,27 +41,37 @@ public class UserEntity {
         return username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public Inventory getInventory() {
-        return inventory;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public void setPassword(String password) {
         this.password = password;
     }
 
+    public Inventory getInventory() {
+        return inventory;
+    }
+
     public void setInventory(Inventory inventory) {
         this.inventory = inventory;
+    }
+
+    public List<Deck> getDecks() {
+        return decks;
+    }
+
+    public void setDecks(List<Deck> decks) {
+        this.decks = decks;
+    }
+
+    // Utility method to add a deck to the user
+    public void addDeck(Deck deck) {
+        deck.setUser(this);
+        this.decks.add(deck);
     }
 }
