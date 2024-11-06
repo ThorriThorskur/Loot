@@ -11,10 +11,10 @@ import java.util.Map;
 public class Card {
 
     @Id
-    private String id;// ID from Scryfall API
+    private String id; // ID from Scryfall API
 
     private String name;
-    private String mana_cost;
+    private String mana_cost; // Snake case field name
     private String type_line;
 
     @Transient
@@ -46,63 +46,66 @@ public class Card {
         return id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getMana_cost() {
-        return mana_cost;
-    }
-
-    public String getType_line() {
-        return type_line;
-    }
-
-    public String getOracle_text() {
-        return oracle_text;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public String getUsd() {
-        return usd;
-    }
-
-    public String getUsd_foil() {
-        return usd_foil;
-    }
-
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setMana_cost(String mana_cost) {
+    // Add camelCase getter for mana_cost field
+    public String getManaCost() {
+        return mana_cost;
+    }
+
+    public void setManaCost(String mana_cost) {
         this.mana_cost = mana_cost;
     }
 
-    public void setType_line(String type_line) {
+    // Add camelCase getter for type_line field
+    public String getTypeLine() {
+        return type_line;
+    }
+
+    public void setTypeLine(String type_line) {
         this.type_line = type_line;
     }
 
-    public void setOracle_text(String oracle_text) {
+    // Add camelCase getter for oracle_text field
+    public String getOracleText() {
+        return oracle_text;
+    }
+
+    public void setOracleText(String oracle_text) {
         this.oracle_text = oracle_text;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
     }
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
 
+    public String getUsd() {
+        return usd;
+    }
+
     public void setUsd(String usd) {
         this.usd = usd;
     }
 
-    public void setUsd_foil(String usd_foil) {
+    public String getUsdFoil() {
+        return usd_foil;
+    }
+
+    public void setUsdFoil(String usd_foil) {
         this.usd_foil = usd_foil;
     }
 

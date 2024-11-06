@@ -6,33 +6,39 @@
 <body>
 <h1 th:text="'Inventory of ' + ${user.username}"></h1>
 <p><a th:href="@{'/search?userId=' + ${user.id}}">Search for Cards</a></p>
-
-<div th:if="${user.inventory.cards.size()} == 0">
+<div>
+    <p>Sort By:
+        <a th:href="@{'/user/inventory/sorted(sortBy='manaCost')}">Mana Cost</a> |
+        <a th:href="@{'/user/inventory/sorted(sortBy='name')}">Name</a>
+    </p>
+</div>
+<div th:if="${user.inventory.inventoryCards.size()} == 0">
     <p>Your inventory is empty.</p>
 </div>
-<div th:if="${user.inventory.cards.size()} > 0">
+<div th:if="${user.inventory.inventoryCards.size()} > 0">
     <ul>
-        <li th:each="card : ${user.inventory.cards}">
-            <h2 th:text="${card.name}"></h2>
-            <p><strong>Mana Cost:</strong> <span th:text="${card.mana_cost}">N/A</span></p>
-            <p><strong>Type:</strong> <span th:text="${card.type_line}">N/A</span></p>
-            <p><strong>Oracle Text:</strong> <span th:text="${card.oracle_text}">N/A</span></p>
+        <li th:each="inventoryCard : ${user.inventory.inventoryCards}">
+            <h2 th:text="${inventoryCard.card.name}"></h2>
+            <p><strong>Mana Cost:</strong> <span th:text="${inventoryCard.card.manaCost}">N/A</span></p>
+            <p><strong>Type:</strong> <span th:text="${inventoryCard.card.typeLine}">N/A</span></p>
+            <p><strong>Oracle Text:</strong> <span th:text="${inventoryCard.card.oracleText}">N/A</span></p>
             <p><strong>Price:</strong>
-                <span th:text="${card.usd != null ? '$' + card.usd : 'N/A'}">N/A</span>
+                <span th:text="${inventoryCard.card.usd != null ? '$' + inventoryCard.card.usd : 'N/A'}">N/A</span>
             </p>
             <p><strong>Foil Price:</strong>
-                <span th:text="${card.usd_foil != null ? '$' + card.usd_foil : 'N/A'}">N/A</span>
+                <span th:text="${inventoryCard.card.usdFoil != null ? '$' + inventoryCard.card.usdFoil : 'N/A'}">N/A</span>
             </p>
+            <p><strong>Quantity:</strong> <span th:text="${inventoryCard.count}"></span></p>
             <!-- Display the card image -->
-            <div th:if="${card.imageUrl != null}">
-                <img th:src="${card.imageUrl}" alt="Card Image" />
+            <div th:if="${inventoryCard.card.imageUrl != null}">
+                <img th:src="${inventoryCard.card.imageUrl}" alt="Card Image" />
             </div>
-            <div th:unless="${card.imageUrl != null}">
+            <div th:unless="${inventoryCard.card.imageUrl != null}">
                 <p>No image available.</p>
             </div>
             <!-- Optionally, add a remove button -->
             <form th:action="@{/removeCardFromInventory}" method="post">
-                <input type="hidden" name="cardId" th:value="${card.id}" />
+                <input type="hidden" name="cardId" th:value="${inventoryCard.card.id}" />
                 <input type="hidden" name="userId" th:value="${user.id}" />
                 <button type="submit">Remove from Inventory</button>
             </form>
