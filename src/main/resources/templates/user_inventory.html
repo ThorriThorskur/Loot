@@ -6,6 +6,7 @@
 <body>
 <h1 th:text="'Inventory of ' + ${user.username}"></h1>
 <p><a th:href="@{'/search?userId=' + ${user.id}}">Search for Cards</a></p>
+<p><a th:href="@{/}">Back to Home</a></p>
 <!-- Button to go to user's deck -->
 <div th:if="${user.decks.size()} == 0">
     <p>You have no decks.</p>

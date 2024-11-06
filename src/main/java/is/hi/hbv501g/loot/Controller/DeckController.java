@@ -116,7 +116,7 @@ public class DeckController {
             return "error";
         }
 
-        // Find the DeckCard and remove it
+        // Find and remove the DeckCard
         Optional<DeckCard> deckCardOptional = deck.getDeckCards().stream()
                 .filter(deckCard -> deckCard.getCard().getId().equals(cardId))
                 .findFirst();
@@ -132,6 +132,42 @@ public class DeckController {
 
         return "redirect:/user/" + userId + "/deck/" + deckId;
     }
+
+    // Method to verify if the deck has at least 30 cards
+    @PostMapping("/user/{userId}/deck/{deckId}/verify")
+    public String verifyDeck(@PathVariable Long userId, @PathVariable Long deckId, Model model) {
+        Optional<UserEntity> userOptional = userService.findById(userId);
+        if (!userOptional.isPresent()) {
+            model.addAttribute("error", "User not found.");
+            return "error";
+        }
+
+        UserEntity user = userOptional.get();
+        Deck deck = user.getDecks().stream()
+                .filter(d -> d.getId().equals(deckId))
+                .findFirst()
+                .orElse(null);
+
+        if (deck == null) {
+            model.addAttribute("error", "Deck not found.");
+            return "error";
+        }
+
+        // Verify if the deck has at least 30 cards
+        int totalCards = deck.getDeckCards().stream().mapToInt(DeckCard::getCount).sum();
+        if (totalCards >= 5) {
+            model.addAttribute("verificationMessage", "Deck is valid. It has at least 5 cards.");
+        } else {
+            model.addAttribute("verificationMessage", "Deck is invalid. It must have at least 5 cards.");
+        }
+
+        // Re-add user and deck information to the model for the view
+        model.addAttribute("user", user);
+        model.addAttribute("deck", deck);
+
+        return "user_deck"; // Return to the deck view with the verification message
+    }
+
 
 }
 
