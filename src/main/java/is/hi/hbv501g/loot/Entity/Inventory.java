@@ -12,7 +12,7 @@ public class Inventory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(mappedBy = "inventory", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "inventory", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserEntity user;
 
     @OneToMany(mappedBy = "inventory", cascade = CascadeType.ALL, orphanRemoval = true)

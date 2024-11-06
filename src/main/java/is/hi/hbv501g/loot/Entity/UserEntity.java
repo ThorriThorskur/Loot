@@ -19,8 +19,10 @@ public class UserEntity {
     @Column(length = 1000000) // Increase the length to handle larger data (e.g., 1 MB)
     private byte[] profilePicture;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "inventory_id", referencedColumnName = "id")
     private Inventory inventory;
+
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Deck> decks = new ArrayList<>();

@@ -14,8 +14,13 @@
 <div th:if="${deck.deckCards.size()} > 0">
     <ul>
         <li th:each="deckCard : ${deck.deckCards}">
-            <h2 th:text="${deckCard.card.name}"></h2>
-            <p><strong>Mana Cost:</strong> <span th:text="${deckCard.card.manaCost}"></span></p>
+            <!-- Display the card image -->
+            <div th:if="${deckCard.card.imageUrl != null}">
+                <img th:src="${deckCard.card.imageUrl}" alt="Card Image" />
+            </div>
+            <div th:unless="${deckCard.card.imageUrl != null}">
+                <p>No image available.</p>
+            </div>
             <form th:action="@{/user/{userId}/deck/{deckId}/removeCard(userId=${user.id}, deckId=${deck.id})}" method="post">
                 <input type="hidden" name="cardId" th:value="${deckCard.card.id}" />
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
