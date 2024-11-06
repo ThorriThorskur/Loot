@@ -2,6 +2,9 @@ package is.hi.hbv501g.loot.Entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 public class UserEntity {
     @Id
@@ -13,6 +16,9 @@ public class UserEntity {
 
     @OneToOne(cascade = CascadeType.ALL)
     private Inventory inventory;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Deck> decks = new ArrayList<>();
 
     // No-argument constructor
     public UserEntity() {
@@ -53,5 +59,19 @@ public class UserEntity {
 
     public void setInventory(Inventory inventory) {
         this.inventory = inventory;
+    }
+
+    public List<Deck> getDecks() {
+        return decks;
+    }
+
+    public void setDecks(List<Deck> decks) {
+        this.decks = decks;
+    }
+
+    // Utility method to add a deck to the user
+    public void addDeck(Deck deck) {
+        deck.setUser(this);
+        this.decks.add(deck);
     }
 }

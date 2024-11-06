@@ -6,6 +6,25 @@
 <body>
 <h1 th:text="'Inventory of ' + ${user.username}"></h1>
 <p><a th:href="@{'/search?userId=' + ${user.id}}">Search for Cards</a></p>
+<!-- Button to go to user's deck -->
+<div th:if="${user.decks.size()} == 0">
+    <p>You have no decks.</p>
+    <form th:action="@{/createDeck}" method="post">
+        <input type="hidden" name="userId" th:value="${user.id}" />
+        <button type="submit">Create New Deck</button>
+    </form>
+</div>
+
+<div th:if="${user.decks.size()} > 0">
+    <h3>Your Decks:</h3>
+    <ul>
+        <li th:each="deck : ${user.decks}">
+            <a th:href="@{'/user/' + ${user.id} + '/deck/' + ${deck.id}}"
+               th:text="${deck.name}">View Deck</a>
+        </li>
+    </ul>
+</div>
+
 <div>
     <p>Sort By:
         <a th:href="@{'/user/inventory/sorted(sortBy='manaCost')}">Mana Cost</a> |
@@ -42,6 +61,14 @@
                 <input type="hidden" name="userId" th:value="${user.id}" />
                 <button type="submit">Remove from Inventory</button>
             </form>
+            <!-- Add a button to add the card to the deck -->
+            <form th:action="@{/addCardToDeck}" method="post">
+                <input type="hidden" name="cardId" th:value="${inventoryCard.card.id}" />
+                <input type="hidden" name="userId" th:value="${user.id}" />
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit">Add to Deck</button>
+            </form>
+
             <hr/>
         </li>
     </ul>
