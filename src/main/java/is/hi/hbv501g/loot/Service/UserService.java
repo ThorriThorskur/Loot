@@ -45,6 +45,18 @@ public class UserService {
     }
 
     public void deleteById(Long id) {
-        userRepository.deleteById(id);
+        Optional<UserEntity> userOptional = userRepository.findById(id);
+        if (userOptional.isPresent()) {
+            UserEntity user = userOptional.get();
+
+            // Clear inventory cards first to avoid foreign key issues
+            if (user.getInventory() != null) {
+                user.getInventory().getInventoryCards().clear();
+            }
+
+            // Delete the user
+            userRepository.deleteById(id);
+        }
     }
+
 }

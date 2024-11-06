@@ -9,6 +9,7 @@ public class InventoryCard {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "inventory_id", nullable = false)
     private Inventory inventory;
 
     @ManyToOne
