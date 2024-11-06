@@ -18,6 +18,7 @@ public class UserService {
     @Autowired
     private InventoryService inventoryService;
 
+
     public List<UserEntity> findAll() {
         return userRepository.findAll();
     }

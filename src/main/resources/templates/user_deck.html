@@ -16,15 +16,25 @@
         <li th:each="deckCard : ${deck.deckCards}">
             <h2 th:text="${deckCard.card.name}"></h2>
             <p><strong>Mana Cost:</strong> <span th:text="${deckCard.card.manaCost}"></span></p>
-            <form th:action="@{/removeCardFromDeck}" method="post">
-                <input type="hidden" name="deckCardId" th:value="${deckCard.id}"/>
+            <form th:action="@{/user/{userId}/deck/{deckId}/removeCard(userId=${user.id}, deckId=${deck.id})}" method="post">
+                <input type="hidden" name="cardId" th:value="${deckCard.card.id}" />
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <button type="submit">Remove from Deck</button>
             </form>
             <hr/>
         </li>
     </ul>
 </div>
+<!-- Verify Deck Button -->
+<form th:action="@{/user/{userId}/deck/{deckId}/verify(userId=${user.id}, deckId=${deck.id})}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <button type="submit">Verify Deck</button>
+</form>
 
+<!-- Verification Result Message -->
+<div th:if="${verificationMessage != null}">
+    <p th:text="${verificationMessage}"></p>
+</div>
 <a th:href="@{/user/{userId}/inventory(userId=${user.id})}">Back to Inventory</a>
 
 </body>

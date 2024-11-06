@@ -14,6 +14,11 @@ public class UserEntity {
     private String username;
     private String password;
 
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Column(length = 1000000) // Increase the length to handle larger data (e.g., 1 MB)
+    private byte[] profilePicture;
+
     @OneToOne(cascade = CascadeType.ALL)
     private Inventory inventory;
 
@@ -73,5 +78,13 @@ public class UserEntity {
     public void addDeck(Deck deck) {
         deck.setUser(this);
         this.decks.add(deck);
+    }
+
+    public byte[] getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(byte[] profilePicture) {
+        this.profilePicture = profilePicture;
     }
 }

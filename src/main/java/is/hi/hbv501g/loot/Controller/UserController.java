@@ -22,16 +22,7 @@ public class UserController {
         return "index";
     }
 
-    @GetMapping("/profile")
-    public String userProfile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
 
-        UserEntity user = userService.findByUsername(userDetails.getUsername()).orElse(null);
-
-        //TODO: in profile html show card inventory.
-
-        model.addAttribute("user", user);
-        return "profile"; // Render the profile page
-    }
 
     @GetMapping("/user_management")
     public String listUsers(Model model) {
