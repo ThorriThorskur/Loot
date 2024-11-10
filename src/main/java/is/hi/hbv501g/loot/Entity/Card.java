@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 
 import java.util.Map;
 
+
+
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Card {
@@ -16,6 +18,8 @@ public class Card {
     private String name;
     private String mana_cost; // Snake case field name
     private String type_line;
+    private boolean isLegendary;
+    private boolean isLand;
 
     @Transient
     private String usd;
@@ -32,13 +36,15 @@ public class Card {
     public Card() {
     }
 
-    public Card(String id, String name, String mana_cost, String type_line, String oracle_text, String imageUrl) {
+    public Card(String id, String name, String mana_cost, String type_line, String oracle_text, String imageUrl, boolean isLegendary, boolean isLand) {
         this.id = id;
         this.name = name;
         this.mana_cost = mana_cost;
         this.type_line = type_line;
         this.oracle_text = oracle_text;
         this.imageUrl = imageUrl;
+        this.isLegendary = isLegendary;
+        this.isLand = isLand;
     }
 
     // Getters and Setters
@@ -58,7 +64,6 @@ public class Card {
         this.name = name;
     }
 
-    // Add camelCase getter for mana_cost field
     public String getManaCost() {
         return mana_cost;
     }
@@ -67,7 +72,6 @@ public class Card {
         this.mana_cost = mana_cost;
     }
 
-    // Add camelCase getter for type_line field
     public String getTypeLine() {
         return type_line;
     }
@@ -76,7 +80,6 @@ public class Card {
         this.type_line = type_line;
     }
 
-    // Add camelCase getter for oracle_text field
     public String getOracleText() {
         return oracle_text;
     }
@@ -107,6 +110,14 @@ public class Card {
 
     public void setUsdFoil(String usd_foil) {
         this.usd_foil = usd_foil;
+    }
+
+    public boolean isLegendary() {
+        return type_line != null && type_line.toLowerCase().contains("legendary");
+    }
+
+    public boolean isLand() {
+        return type_line != null && type_line.toLowerCase().contains("land");
     }
 
     // Unpack methods for JSON deserialization
