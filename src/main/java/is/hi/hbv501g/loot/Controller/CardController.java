@@ -1,9 +1,6 @@
 package is.hi.hbv501g.loot.Controller;
 
 import is.hi.hbv501g.loot.Entity.Card;
-import is.hi.hbv501g.loot.Entity.Inventory;
-import is.hi.hbv501g.loot.Entity.UserEntity;
-import is.hi.hbv501g.loot.Entity.InventoryCard;
 import is.hi.hbv501g.loot.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,14 +33,14 @@ public class CardController {
             // Delay between requests
             Thread.sleep(REQUEST_DELAY_MS);
             Map<String, Object> cardTypesResponse = restTemplate.getForObject(cardTypesUrl, Map.class);
-            List<String> cardTypes = cardTypesResponse != null && cardTypesResponse.containsKey("data")
-                    ? (List<String>) cardTypesResponse.get("data")
+            List<String> cardTypes = cardTypesResponse != null && cardTypesResponse.containsKey("static/data")
+                    ? (List<String>) cardTypesResponse.get("static/data")
                     : new ArrayList<>();
 
             Thread.sleep(REQUEST_DELAY_MS);
             Map<String, Object> setsResponse = restTemplate.getForObject(setsUrl, Map.class);
-            List<Map<String, String>> sets = setsResponse != null && setsResponse.containsKey("data")
-                    ? (List<Map<String, String>>) setsResponse.get("data")
+            List<Map<String, String>> sets = setsResponse != null && setsResponse.containsKey("static/data")
+                    ? (List<Map<String, String>>) setsResponse.get("static/data")
                     : new ArrayList<>();
 
             model.addAttribute("cardTypes", cardTypes);
@@ -116,8 +113,8 @@ public class CardController {
             Map<String, Object> response = restTemplate.getForObject(url, Map.class);
 
             List<Card> cards = new ArrayList<>();
-            if (response != null && response.containsKey("data")) {
-                List<Map<String, Object>> data = (List<Map<String, Object>>) response.get("data");
+            if (response != null && response.containsKey("static/data")) {
+                List<Map<String, Object>> data = (List<Map<String, Object>>) response.get("static/data");
                 for (Map<String, Object> cardData : data) {
                     try {
                         Thread.sleep(REQUEST_DELAY_MS);

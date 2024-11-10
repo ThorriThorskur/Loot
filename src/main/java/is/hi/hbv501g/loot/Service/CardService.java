@@ -8,15 +8,11 @@ import is.hi.hbv501g.loot.repository.CardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 
 
 import java.util.List;
@@ -57,8 +53,8 @@ public class CardService {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(responseBody);
 
-            if (root.has("data")) {
-                JsonNode data = root.get("data");
+            if (root.has("static/data")) {
+                JsonNode data = root.get("static/data");
                 Map<String, Card> idToCardMap = new HashMap<>();
                 for (JsonNode node : data) {
                     Card card = mapper.treeToValue(node, Card.class);
