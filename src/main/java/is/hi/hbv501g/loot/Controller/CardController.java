@@ -30,31 +30,28 @@ public class CardController {
         String setsUrl = "https://api.scryfall.com/sets";
 
         try {
-            // Delay between requests
+            // Fetch card types from the API
             Thread.sleep(REQUEST_DELAY_MS);
             Map<String, Object> cardTypesResponse = restTemplate.getForObject(cardTypesUrl, Map.class);
-            List<String> cardTypes = cardTypesResponse != null && cardTypesResponse.containsKey("static/data")
-                    ? (List<String>) cardTypesResponse.get("static/data")
+            List<String> cardTypes = cardTypesResponse != null && cardTypesResponse.containsKey("data")
+                    ? (List<String>) cardTypesResponse.get("data")
                     : new ArrayList<>();
 
+            // Fetch sets from the API
             Thread.sleep(REQUEST_DELAY_MS);
             Map<String, Object> setsResponse = restTemplate.getForObject(setsUrl, Map.class);
-            List<Map<String, String>> sets = setsResponse != null && setsResponse.containsKey("static/data")
-                    ? (List<Map<String, String>>) setsResponse.get("static/data")
+            List<Map<String, String>> sets = setsResponse != null && setsResponse.containsKey("data")
+                    ? (List<Map<String, String>>) setsResponse.get("data")
                     : new ArrayList<>();
 
             model.addAttribute("cardTypes", cardTypes);
             model.addAttribute("sets", sets);
-            model.addAttribute("username", userDetails.getUsername());
+
+            // Ensure userDetails is not null before accessing username
+            model.addAttribute("username", userDetails != null ? userDetails.getUsername() : "Guest");
 
         } catch (HttpClientErrorException e) {
-            if (e.getStatusCode().value() == 429) { // Handle rate limit error
-                System.err.println("Rate limit exceeded: " + e.getMessage());
-                model.addAttribute("error", "Rate limit exceeded. Please try again later.");
-            } else {
-                System.err.println("Error fetching data from Scryfall API: " + e.getMessage());
-                model.addAttribute("error", "There was an issue fetching data from Scryfall. Please try again later.");
-            }
+            handleHttpClientErrorException(e, model);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -67,44 +64,26 @@ public class CardController {
             @RequestParam("query") String query,
             @RequestParam(value = "type", required = false) String type,
             @RequestParam(value = "set", required = false) String set,
-            @RequestParam(value = "color", required = false) String color, // Add color parameter
-            @RequestParam(value = "rarity", required = false) String rarity, // Add rarity parameter
+            @RequestParam(value = "color", required = false) String color,
+            @RequestParam(value = "rarity", required = false) String rarity,
             @RequestParam(value = "isLegendary", required = false) Boolean isLegendary,
             @RequestParam(value = "isLand", required = false) Boolean isLand,
             Model model) {
 
+        // Initialize the query URL
         StringBuilder urlBuilder = new StringBuilder("https://api.scryfall.com/cards/search?q=");
-        urlBuilder.append(query);
 
-        // Append card type filter
-        if (type != null && !type.isEmpty()) {
-            urlBuilder.append("+t:").append(type);
+        // Append search terms if they exist
+        if (!query.trim().isEmpty()) {
+            urlBuilder.append(query.trim());
         }
 
-        // Append set filter
-        if (set != null && !set.isEmpty()) {
-            urlBuilder.append("+e:").append(set);
-        }
-
-        // Append color filter
-        if (color != null && !color.isEmpty()) {
-            urlBuilder.append("+c:").append(color);
-        }
-
-        // Append rarity filter
-        if (rarity != null && !rarity.isEmpty()) {
-            urlBuilder.append("+r:").append(rarity);
-        }
-
-        // Append legendary filter
-        if (isLegendary != null && isLegendary) {
-            urlBuilder.append("+t:legendary");
-        }
-
-        // Append land filter
-        if (isLand != null && isLand) {
-            urlBuilder.append("+t:land");
-        }
+        if (type != null && !type.isEmpty()) urlBuilder.append("+t:").append(type);
+        if (set != null && !set.isEmpty()) urlBuilder.append("+e:").append(set);
+        if (color != null && !color.isEmpty()) urlBuilder.append("+c:").append(color);
+        if (rarity != null && !rarity.isEmpty()) urlBuilder.append("+r:").append(rarity);
+        if (isLegendary != null && isLegendary) urlBuilder.append("+t:legendary");
+        if (isLand != null && isLand) urlBuilder.append("+t:land");
 
         String url = urlBuilder.toString();
 
@@ -113,8 +92,8 @@ public class CardController {
             Map<String, Object> response = restTemplate.getForObject(url, Map.class);
 
             List<Card> cards = new ArrayList<>();
-            if (response != null && response.containsKey("static/data")) {
-                List<Map<String, Object>> data = (List<Map<String, Object>>) response.get("static/data");
+            if (response != null && response.containsKey("data")) {
+                List<Map<String, Object>> data = (List<Map<String, Object>>) response.get("data");
                 for (Map<String, Object> cardData : data) {
                     try {
                         Thread.sleep(REQUEST_DELAY_MS);
@@ -130,11 +109,16 @@ public class CardController {
                         }
                     }
                 }
+            } else {
+                model.addAttribute("error", "No cards matched your search criteria. Please try again with different terms.");
             }
 
             model.addAttribute("cards", cards);
         } catch (HttpClientErrorException e) {
-            if (e.getStatusCode().value() == 429) {
+            if (e.getStatusCode().value() == 404 && e.getResponseBodyAsString().contains("not_found")) {
+                System.err.println("No cards matched search criteria: " + e.getMessage());
+                model.addAttribute("error", "No cards matched your search criteria. Please try again with different terms.");
+            } else if (e.getStatusCode().value() == 429) {
                 System.err.println("Rate limit exceeded: " + e.getMessage());
                 model.addAttribute("error", "Rate limit exceeded. Please try again later.");
             } else {
@@ -147,5 +131,15 @@ public class CardController {
 
         System.out.println("API URL: " + url);
         return "results";
+    }
+
+    private void handleHttpClientErrorException(HttpClientErrorException e, Model model) {
+        if (e.getStatusCode().value() == 429) {
+            System.err.println("Rate limit exceeded: " + e.getMessage());
+            model.addAttribute("error", "Rate limit exceeded. Please try again later.");
+        } else {
+            System.err.println("Error fetching data from Scryfall API: " + e.getMessage());
+            model.addAttribute("error", "There was an issue fetching data from Scryfall. Please try again later.");
+        }
     }
 }

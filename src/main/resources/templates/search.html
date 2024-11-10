@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Search for Cards</title>
     <style>
@@ -119,22 +119,18 @@
         </select>
 
         <!-- Dropdown for card type -->
-        <label for="type">Card Type:</label>
         <select id="type" name="type">
             <option value="">Select Card Type</option>
-            <th:block th:each="type : ${cardTypes}">
-                <option th:value="${type}" th:text="${type}"></option>
-            </th:block>
+            <option th:each="type : ${cardTypes}" th:value="${type}" th:text="${type}"></option>
         </select>
 
-        <!-- Dropdown for MTG sets -->
-        <label for="set">MTG Set:</label>
         <select id="set" name="set">
             <option value="">Select Set</option>
-            <th:block th:each="set : ${sets}">
-                <option th:value="${set['code']}" th:text="${set['name']} + ' (' + ${set['code']} + ')'"></option>
-            </th:block>
+            <option th:each="set : ${sets}" th:value="${set['code']}" th:text="${set['name']} + ' (' + ${set['code']} + ')'"></option>
         </select>
+
+
+
 
         <!-- Dropdown for card rarity -->
         <label for="rarity">Card Rarity:</label>
