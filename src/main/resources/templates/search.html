@@ -1,13 +1,66 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Search Cards</title>
+    <title>Search for Cards</title>
 </head>
 <body>
 <h1>Search for Cards</h1>
 <p th:text="${username}"></p>
 <form th:action="@{/search}" method="post">
-    <input type="text" name="query" placeholder="Enter card name" required />
+    <!-- Basic query input (optional) -->
+    <label for="query">Card Name or Keyword:</label>
+    <input type="text" id="query" name="query" placeholder="Enter card name or keyword" />
+
+    <!-- Dropdown for mana color -->
+    <label for="color">Mana Color:</label>
+    <select id="color" name="color">
+        <option value="">Select Mana Color</option>
+        <option value="W">White</option>
+        <option value="U">Blue</option>
+        <option value="B">Black</option>
+        <option value="R">Red</option>
+        <option value="G">Green</option>
+    </select>
+
+    <!-- Dropdown for card type -->
+    <label for="type">Card Type:</label>
+    <select id="type" name="type">
+        <option value="">Select Card Type</option>
+        <th:block th:each="type : ${cardTypes}">
+            <option th:value="${type}" th:text="${type}"></option>
+        </th:block>
+    </select>
+
+    <!-- Dropdown for MTG sets -->
+    <label for="set">MTG Set:</label>
+    <select id="set" name="set">
+        <option value="">Select Set</option>
+        <th:block th:each="set : ${sets}">
+            <option th:value="${set['code']}" th:text="${set['name']} + ' (' + ${set['code']} + ')'"></option>
+        </th:block>
+    </select>
+
+    <!-- Dropdown for card rarity -->
+    <label for="rarity">Card Rarity:</label>
+    <select id="rarity" name="rarity">
+        <option value="">Select Rarity</option>
+        <option value="common">Common</option>
+        <option value="uncommon">Uncommon</option>
+        <option value="rare">Rare</option>
+        <option value="mythic">Mythic</option>
+    </select>
+
+    <!-- Checkbox for legendary filter -->
+    <label for="isLegendary">
+        <input type="checkbox" id="isLegendary" name="isLegendary" /> Legendary
+    </label>
+
+    <!-- Checkbox for land filter -->
+    <label for="isLand">
+        <input type="checkbox" id="isLand" name="isLand" /> Land
+    </label>
+
+    <!-- Submit button -->
     <button type="submit">Search</button>
 </form>
 </body>
