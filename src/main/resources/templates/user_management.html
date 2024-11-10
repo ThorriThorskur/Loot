@@ -2,24 +2,106 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>User Management</title>
+  <style>
+    /* Reset basic styling */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Layout styling */
+    body {
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+
+    /* Container styling */
+    .management-container {
+      width: 100%;
+      max-width: 800px;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* Table styling */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #007bff;
+      color: #fff;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    /* Action links styling */
+    .action-links a {
+      color: #007bff;
+      text-decoration: none;
+      margin: 0 5px;
+      transition: color 0.3s;
+    }
+
+    .action-links a:hover {
+      color: #0056b3;
+    }
+
+    /* Responsive design */
+    @media (max-width: 600px) {
+      .management-container {
+        width: 90%;
+      }
+
+      table, th, td {
+        font-size: 0.9em;
+      }
+    }
+  </style>
 </head>
 <body>
-<h1>User Management</h1>
+<div class="management-container">
+  <h1>User Management</h1>
 
-<table border="1">
-  <tr>
-    <th>ID</th><th>Username</th><th>Password</th><th>Actions</th>
-  </tr>
-  <tr th:each="user : ${users}">
-    <td th:text="${user.id}">1</td>
-    <td th:text="${user.username}">Username</td>
-    <td th:text="${user.password}">Password</td>
-    <td>
-      <a th:href="@{'/deleteuser/' + ${user.id}}">Delete</a> |
-      <a th:href="@{'/user/' + ${user.id} + '/inventory'}">View Inventory</a> |
-      <a th:href="@{'/search'(userId=${user.id})}">Search Cards</a>
-    </td>
-  </tr>
-</table>
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Username</th>
+      <th>Password</th>
+      <th>Actions</th>
+    </tr>
+    <tr th:each="user : ${users}">
+      <td th:text="${user.id}">1</td>
+      <td th:text="${user.username}">Username</td>
+      <td th:text="${user.password}">Password</td>
+      <td class="action-links">
+        <a th:href="@{'/deleteuser/' + ${user.id}}">Delete</a> |
+        <a th:href="@{'/user/' + ${user.id} + '/inventory'}">View Inventory</a> |
+        <a th:href="@{'/search'(userId=${user.id})}">Search Cards</a>
+      </td>
+    </tr>
+  </table>
+</div>
 </body>
 </html>

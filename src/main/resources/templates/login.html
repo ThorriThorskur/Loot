@@ -2,19 +2,118 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Login</title>
+  <style>
+    /* Reset basic styling */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Layout styling */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+
+    /* Container styling */
+    .login-container {
+      max-width: 400px;
+      width: 100%;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+
+    /* Error message styling */
+    .error-message {
+      color: red;
+      margin-bottom: 20px;
+    }
+
+    /* Form styling */
+    form p {
+      margin: 15px 0;
+      text-align: left;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    /* Button styling */
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Back link styling */
+    a {
+      display: inline-block;
+      margin-top: 15px;
+      color: #007bff;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    a:hover {
+      color: #0056b3;
+    }
+
+    /* Responsive design */
+    @media (max-width: 480px) {
+      .login-container {
+        width: 90%;
+      }
+
+      h1 {
+        font-size: 1.5em;
+      }
+    }
+  </style>
 </head>
 <body>
-<h1>Login</h1>
+<div class="login-container">
+  <h1>Login</h1>
 
-<div th:if="${param.error}" style="color: red;">
-  <p>Invalid username or password. Please try again.</p>
+  <div th:if="${param.error}" class="error-message">
+    <p>Invalid username or password. Please try again.</p>
+  </div>
+
+  <form th:action="@{/login}" method="post">
+    <p>Username: <input type="text" name="username" /></p>
+    <p>Password: <input type="password" name="password" /></p>
+    <p><button type="submit">Login</button></p>
+    <a href="/">Go back</a>
+  </form>
 </div>
-
-<form th:action="@{/login}" method="post">
-  <p>Username: <input type="text" name="username" /></p>
-  <p>Password: <input type="password" name="password" /></p>
-  <p><button type="submit">Login</button></p>
-  <a href="/">go back</a>
-</form>
 </body>
 </html>

@@ -2,73 +2,205 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>User Inventory</title>
+    <style>
+        /* Reset basic styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Layout styling */
+        body {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        /* Container styling */
+        .inventory-container {
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h3 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Links styling */
+        .nav-links a {
+            display: inline-block;
+            margin: 10px 0;
+            color: #007bff;
+            text-decoration: none;
+            font-size: 1em;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #0056b3;
+        }
+
+        /* Button styling */
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Inventory and Deck listing styling */
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        /* Image styling */
+        .card-image img {
+            max-width: 150px;
+            height: auto;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        /* Sorting section */
+        .sort-section {
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .sort-section a {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 10px;
+            transition: color 0.3s;
+        }
+
+        .sort-section a:hover {
+            color: #0056b3;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .inventory-container {
+                width: 90%;
+            }
+
+            h1, h3 {
+                font-size: 1.5em;
+            }
+
+            .card-image img {
+                max-width: 100px;
+            }
+        }
+    </style>
 </head>
 <body>
-<h1 th:text="'Inventory of ' + ${user.username}"></h1>
-<p><a th:href="@{'/search?userId=' + ${user.id}}">Search for Cards</a></p>
-<p><a th:href="@{/}">Back to Home</a></p>
-<!-- Button to go to user's deck -->
-<div th:if="${user.decks.size()} == 0">
-    <p>You have no decks.</p>
-    <form th:action="@{/createDeck}" method="post">
-        <input type="hidden" name="userId" th:value="${user.id}" />
-        <button type="submit">Create New Deck</button>
-    </form>
-</div>
+<div class="inventory-container">
+    <h1 th:text="'Inventory of ' + ${user.username}"></h1>
 
-<div th:if="${user.decks.size()} > 0">
-    <h3>Your Decks:</h3>
-    <ul>
-        <li th:each="deck : ${user.decks}">
-            <a th:href="@{'/user/' + ${user.id} + '/deck/' + ${deck.id}}"
-               th:text="${deck.name}">View Deck</a>
-        </li>
-    </ul>
-</div>
+    <div class="nav-links">
+        <p><a th:href="@{'/search?userId=' + ${user.id}}">Search for Cards</a></p>
+        <p><a th:href="@{/}">Back to Home</a></p>
+    </div>
 
-<div>
-    <p>Sort By:
-        <a th:href="@{'/user/inventory/sorted(sortBy='manaCost')}">Mana Cost</a> |
-        <a th:href="@{'/user/inventory/sorted(sortBy='name')}">Name</a>
-    </p>
-</div>
-<div th:if="${user.inventory.inventoryCards.size()} == 0">
-    <p>Your inventory is empty.</p>
-</div>
-<div th:if="${user.inventory.inventoryCards.size()} > 0">
-    <ul>
-        <li th:each="inventoryCard : ${user.inventory.inventoryCards}">
-            <p><strong>Quantity:</strong> <span th:text="${inventoryCard.count}"></span></p>
-            <!-- Increment Quantity Button -->
-            <form th:action="@{/user/{userId}/inventory/incrementCard(userId=${user.id})}" method="post">
-                <input type="hidden" name="cardId" th:value="${inventoryCard.card.id}" />
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <button type="submit">Add One More</button>
-            </form>
-            <!-- Display the card image -->
-            <div th:if="${inventoryCard.card.imageUrl != null}">
-                <img th:src="${inventoryCard.card.imageUrl}" alt="Card Image" />
-            </div>
-            <div th:unless="${inventoryCard.card.imageUrl != null}">
-                <p>No image available.</p>
-            </div>
-            <!-- Optionally, add a remove button -->
-            <form th:action="@{/removeCardFromInventory}" method="post">
-                <input type="hidden" name="cardId" th:value="${inventoryCard.card.id}" />
-                <input type="hidden" name="userId" th:value="${user.id}" />
-                <button type="submit">Remove from Inventory</button>
-            </form>
-            <!-- Add a button to add the card to the deck -->
-            <form th:action="@{/addCardToDeck}" method="post">
-                <input type="hidden" name="cardId" th:value="${inventoryCard.card.id}" />
-                <input type="hidden" name="userId" th:value="${user.id}" />
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <button type="submit">Add to Deck</button>
-            </form>
+    <!-- Button to go to user's deck -->
+    <div th:if="${user.decks.size()} == 0">
+        <p>You have no decks.</p>
+        <form th:action="@{/createDeck}" method="post">
+            <input type="hidden" name="userId" th:value="${user.id}" />
+            <button type="submit">Create New Deck</button>
+        </form>
+    </div>
 
-            <hr/>
-        </li>
-    </ul>
+    <div th:if="${user.decks.size()} > 0">
+        <h3>Your Decks:</h3>
+        <ul>
+            <li th:each="deck : ${user.decks}">
+                <a th:href="@{'/user/' + ${user.id} + '/deck/' + ${deck.id}}"
+                   th:text="${deck.name}">View Deck</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Sorting options -->
+    <div class="sort-section">
+        <p>Sort By:
+            <a th:href="@{'/user/inventory/sorted(sortBy='manaCost')}">Mana Cost</a> |
+            <a th:href="@{'/user/inventory/sorted(sortBy='name')}">Name</a>
+        </p>
+    </div>
+
+    <!-- Inventory Cards Section -->
+    <div th:if="${user.inventory.inventoryCards.size()} == 0">
+        <p>Your inventory is empty.</p>
+    </div>
+
+    <div th:if="${user.inventory.inventoryCards.size()} > 0">
+        <ul>
+            <li th:each="inventoryCard : ${user.inventory.inventoryCards}">
+                <p><strong>Quantity:</strong> <span th:text="${inventoryCard.count}"></span></p>
+
+                <!-- Increment Quantity Button -->
+                <form th:action="@{/user/{userId}/inventory/incrementCard(userId=${user.id})}" method="post">
+                    <input type="hidden" name="cardId" th:value="${inventoryCard.card.id}" />
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit">Add One More</button>
+                </form>
+
+                <!-- Card image -->
+                <div class="card-image" th:if="${inventoryCard.card.imageUrl != null}">
+                    <img th:src="${inventoryCard.card.imageUrl}" alt="Card Image" />
+                </div>
+                <div th:unless="${inventoryCard.card.imageUrl != null}">
+                    <p>No image available.</p>
+                </div>
+
+                <!-- Remove from Inventory Button -->
+                <form th:action="@{/removeCardFromInventory}" method="post">
+                    <input type="hidden" name="cardId" th:value="${inventoryCard.card.id}" />
+                    <input type="hidden" name="userId" th:value="${user.id}" />
+                    <button type="submit">Remove from Inventory</button>
+                </form>
+
+                <!-- Add to Deck Button -->
+                <form th:action="@{/addCardToDeck}" method="post">
+                    <input type="hidden" name="cardId" th:value="${inventoryCard.card.id}" />
+                    <input type="hidden" name="userId" th:value="${user.id}" />
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit">Add to Deck</button>
+                </form>
+                <hr/>
+            </li>
+        </ul>
+    </div>
 </div>
 </body>
 </html>

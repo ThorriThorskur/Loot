@@ -2,40 +2,150 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>User Profile</title>
+  <style>
+    /* Reset basic styling */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Layout styling */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+
+    /* Container styling */
+    .profile-container {
+      max-width: 500px;
+      width: 100%;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+
+    p {
+      margin: 15px 0;
+      font-size: 1em;
+    }
+
+    /* Profile picture styling */
+    .profile-picture {
+      margin: 20px 0;
+    }
+
+    .profile-picture img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #007bff;
+    }
+
+    /* Form styling */
+    form {
+      margin: 15px 0;
+    }
+
+    input[type="file"] {
+      display: block;
+      margin: 10px auto;
+    }
+
+    /* Button styling */
+    button, .button-link {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 10px 5px;
+      color: #fff;
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.3s;
+    }
+
+    button:hover, .button-link:hover {
+      background-color: #0056b3;
+    }
+
+    /* Back link styling */
+    .back-link {
+      margin-top: 20px;
+      color: #007bff;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .back-link:hover {
+      color: #0056b3;
+    }
+
+    /* Responsive design */
+    @media (max-width: 480px) {
+      .profile-container {
+        width: 90%;
+      }
+
+      h1 {
+        font-size: 1.5em;
+      }
+    }
+  </style>
 </head>
 <body>
-<h1>User Profile</h1>
+<div class="profile-container">
+  <h1>User Profile</h1>
 
-<div th:if="${user != null}">
-  <p>Username: <span th:text="${user.username}"></span></p>
-  <p>ID: <span th:text="${user.id}"></span></p>
+  <div th:if="${user != null}">
+    <p><strong>Username:</strong> <span th:text="${user.username}"></span></p>
+    <p><strong>ID:</strong> <span th:text="${user.id}"></span></p>
 
-  <!-- Profile Picture Display -->
-  <div th:if="${profilePictureBase64 != null}">
-    <img th:src="'data:image/jpeg;base64,' + ${profilePictureBase64}" alt="Profile Picture" width="150" height="150" />
-    <!-- Remove Profile Picture Button -->
-    <form th:action="@{/profile/remove}" method="post">
+    <!-- Profile Picture Display -->
+    <div class="profile-picture" th:if="${profilePictureBase64 != null}">
+      <img th:src="'data:image/jpeg;base64,' + ${profilePictureBase64}" alt="Profile Picture" />
+      <!-- Remove Profile Picture Button -->
+      <form th:action="@{/profile/remove}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit">Remove Profile Picture</button>
+      </form>
+    </div>
+    <div th:if="${profilePictureBase64 == null}">
+      <p>No profile picture uploaded.</p>
+    </div>
+
+    <!-- Form to Upload Profile Picture -->
+    <form th:action="@{/profile/upload}" method="post" enctype="multipart/form-data">
+      <input type="file" name="profilePicture" accept="image/*" required />
       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-      <button type="submit">Remove Profile Picture</button>
+      <button type="submit">Upload Profile Picture</button>
     </form>
+
+    <p>
+      <a th:href="@{/user/{userId}/inventory(userId=${user.id})}" class="button-link">Collection</a>
+      <a th:href="@{/}" class="button-link">Back to Home</a>
+    </p>
   </div>
-  <div th:if="${profilePictureBase64 == null}">
-    <p>No profile picture uploaded.</p>
+
+  <div th:if="${user == null}">
+    <p>No user information available.</p>
+    <a th:href="@{/}" class="button-link">Back to Home</a>
   </div>
-
-  <!-- Form to Upload Profile Picture -->
-  <form th:action="@{/profile/upload}" method="post" enctype="multipart/form-data">
-    <input type="file" name="profilePicture" accept="image/*" required />
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-    <button type="submit">Upload Profile Picture</button>
-  </form>
-
-  <p><a th:href="@{/user/{userId}/inventory(userId=${user.id})}" class="button">Collection</a></p>
-  <p><a th:href="@{/}">Back to Home</a></p>
-</div>
-
-<div th:if="${user == null}">
-  <p>No user information available.</p>
 </div>
 </body>
 </html>

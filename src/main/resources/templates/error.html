@@ -2,10 +2,78 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Error</title>
+    <style>
+        /* Reset basic styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Page layout */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        /* Container styling */
+        .error-container {
+            text-align: center;
+            max-width: 400px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #d9534f;
+        }
+
+        p {
+            margin: 15px 0;
+        }
+
+        /* Back to Home link styling */
+        a {
+            display: inline-block;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        a:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive design for smaller screens */
+        @media (max-width: 480px) {
+            .error-container {
+                width: 90%;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
 </head>
 <body>
-<h1>Error</h1>
-<p th:text="${error}">An error occurred.</p>
-<p><a th:href="@{/}">Back to Home</a></p>
+<div class="error-container">
+    <h1>Error</h1>
+    <p th:text="${error}">An error occurred.</p>
+    <p><a th:href="@{/}">Back to Home</a></p>
+</div>
 </body>
 </html>

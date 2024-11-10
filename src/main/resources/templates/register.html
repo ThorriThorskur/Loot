@@ -2,18 +2,104 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Signup</title>
+  <style>
+    /* Reset basic styling */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Layout styling */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+
+    /* Container styling */
+    .signup-container {
+      max-width: 400px;
+      width: 100%;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+
+    /* Error message styling */
+    .error-message {
+      color: red;
+      margin-bottom: 20px;
+    }
+
+    /* Form styling */
+    form p {
+      margin: 15px 0;
+      text-align: left;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    /* Button styling */
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Responsive design */
+    @media (max-width: 480px) {
+      .signup-container {
+        width: 90%;
+      }
+
+      h1 {
+        font-size: 1.5em;
+      }
+    }
+  </style>
 </head>
 <body>
-<h1>Signup</h1>
+<div class="signup-container">
+  <h1>Signup</h1>
 
-<div th:if="${error != null}" style="color: red;">
-  <p th:text="${error}"></p>
+  <div th:if="${error != null}" class="error-message">
+    <p th:text="${error}"></p>
+  </div>
+
+  <form th:action="@{/register}" th:object="${user}" method="post">
+    <p>Username: <input type="text" th:field="*{username}" /></p>
+    <p>Password: <input type="password" th:field="*{password}" /></p>
+    <p><button type="submit">Register</button></p>
+  </form>
 </div>
-
-<form th:action="@{/register}" th:object="${user}" method="post">
-  <p>Username: <input type="text" th:field="*{username}" /></p>
-  <p>Password: <input type="password" th:field="*{password}" /></p>
-  <p><button type="submit">Register</button></p>
-</form>
 </body>
 </html>
