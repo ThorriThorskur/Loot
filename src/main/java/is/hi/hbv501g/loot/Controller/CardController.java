@@ -1,5 +1,5 @@
 package is.hi.hbv501g.loot.Controller;
-
+import java.util.*;
 import is.hi.hbv501g.loot.Entity.Card;
 import is.hi.hbv501g.loot.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import jakarta.servlet.http.HttpSession;
+
 
 @Controller
 public class CardController {
@@ -23,6 +24,7 @@ public class CardController {
     private RestTemplate restTemplate;
 
     private static final int REQUEST_DELAY_MS = 100; // Delay between requests in milliseconds
+    private static final int CARDS_PER_PAGE = 5; // Number of cards to show per page
 
     @GetMapping("/search")
     public String searchCards(@AuthenticationPrincipal UserDetails userDetails, Model model) {
@@ -56,7 +58,6 @@ public class CardController {
         return "search";
     }
 
-
     @PostMapping("/search")
     public String performSearch(
             @RequestParam("query") String query,
@@ -66,10 +67,20 @@ public class CardController {
             @RequestParam(value = "rarity", required = false) String rarity,
             @RequestParam(value = "isLegendary", required = false) Boolean isLegendary,
             @RequestParam(value = "isLand", required = false) Boolean isLand,
-            @RequestParam(value = "nextPageUrl", required = false) String nextPageUrl, // URL for next page from response
-            Model model) {
+            Model model, HttpSession session) {
 
-        String url = nextPageUrl != null && !nextPageUrl.isEmpty() ? nextPageUrl : buildInitialSearchUrl(query, type, set, color, rarity, isLegendary, isLand);
+        // Build the search URL
+        StringBuilder urlBuilder = new StringBuilder("https://api.scryfall.com/cards/search?q=");
+        if (!query.trim().isEmpty()) urlBuilder.append(query.trim());
+
+        if (type != null && !type.isEmpty()) urlBuilder.append("+t:").append(type);
+        if (set != null && !set.isEmpty()) urlBuilder.append("+e:").append(set);
+        if (color != null && !color.isEmpty()) urlBuilder.append("+c:").append(color);
+        if (rarity != null && !rarity.isEmpty()) urlBuilder.append("+r:").append(rarity);
+        if (isLegendary != null && isLegendary) urlBuilder.append("+t:legendary");
+        if (isLand != null && isLand) urlBuilder.append("+t:land");
+
+        String url = urlBuilder.toString();
 
         try {
             Thread.sleep(REQUEST_DELAY_MS);
@@ -82,14 +93,14 @@ public class CardController {
                     Card card = createCardFromResponseData(cardData);
                     cards.add(card);
                 }
+                // Store all results in session
+                session.setAttribute("cachedCards", cards);
             } else {
                 model.addAttribute("error", "No cards matched your search criteria. Please try again with different terms.");
             }
 
-            // Set cards and pagination data in the model
-            model.addAttribute("cards", cards);
-            model.addAttribute("hasMorePages", response != null && Boolean.TRUE.equals(response.get("has_more")));
-            model.addAttribute("nextPageUrl", response != null ? response.get("next_page") : null);
+            // Display the first page (first CARDS_PER_PAGE cards)
+            return showPaginatedResults(1, model, session);
 
         } catch (HttpClientErrorException e) {
             handleHttpClientErrorException(e, model);
@@ -100,18 +111,24 @@ public class CardController {
         return "results";
     }
 
-    private String buildInitialSearchUrl(String query, String type, String set, String color, String rarity, Boolean isLegendary, Boolean isLand) {
-        StringBuilder urlBuilder = new StringBuilder("https://api.scryfall.com/cards/search?q=");
-        if (!query.trim().isEmpty()) urlBuilder.append(query.trim());
+    @GetMapping("/search/page/{page}")
+    public String showPaginatedResults(@PathVariable("page") int page, Model model, HttpSession session) {
+        List<Card> cachedCards = (List<Card>) session.getAttribute("cachedCards");
 
-        if (type != null && !type.isEmpty()) urlBuilder.append("+t:").append(type);
-        if (set != null && !set.isEmpty()) urlBuilder.append("+e:").append(set);
-        if (color != null && !color.isEmpty()) urlBuilder.append("+c:").append(color);
-        if (rarity != null && !rarity.isEmpty()) urlBuilder.append("+r:").append(rarity);
-        if (isLegendary != null && isLegendary) urlBuilder.append("+t:legendary");
-        if (isLand != null && isLand) urlBuilder.append("+t:land");
+        if (cachedCards == null || cachedCards.isEmpty()) {
+            model.addAttribute("error", "No search results found. Please perform a search.");
+            return "results";
+        }
 
-        return urlBuilder.toString();
+        int start = (page - 1) * CARDS_PER_PAGE;
+        int end = Math.min(start + CARDS_PER_PAGE, cachedCards.size());
+        List<Card> paginatedCards = cachedCards.subList(start, end);
+
+        model.addAttribute("cards", paginatedCards);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("hasMorePages", end < cachedCards.size());
+
+        return "results";
     }
 
     private Card createCardFromResponseData(Map<String, Object> cardData) {
@@ -131,13 +148,10 @@ public class CardController {
         return card;
     }
 
-
     private void handleHttpClientErrorException(HttpClientErrorException e, Model model) {
         if (e.getStatusCode().value() == 429) {
-            System.err.println("Rate limit exceeded: " + e.getMessage());
             model.addAttribute("error", "Rate limit exceeded. Please try again later.");
         } else {
-            System.err.println("Error fetching data from Scryfall API: " + e.getMessage());
             model.addAttribute("error", "There was an issue fetching data from Scryfall. Please try again later.");
         }
     }

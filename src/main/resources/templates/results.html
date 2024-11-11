@@ -27,8 +27,10 @@
     </ul>
 
     <!-- Pagination Controls -->
-    <div class="pagination" th:if="${hasMorePages}">
-        <a th:href="@{/search(nextPageUrl=${nextPageUrl})}">Next Page</a>
+    <div class="pagination">
+        <a th:if="${currentPage > 1}" th:href="@{/search/page/{page}(page=${currentPage - 1})}">Previous</a>
+        <span>Page <span th:text="${currentPage}"></span></span>
+        <a th:if="${hasMorePages}" th:href="@{/search/page/{page}(page=${currentPage + 1})}">Next</a>
     </div>
 </div>
 </body>
