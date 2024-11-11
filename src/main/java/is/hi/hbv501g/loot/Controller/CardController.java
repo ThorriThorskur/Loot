@@ -90,25 +90,26 @@ public class CardController {
             if (response != null && response.containsKey("data")) {
                 List<Map<String, Object>> data = (List<Map<String, Object>>) response.get("data");
                 for (Map<String, Object> cardData : data) {
-                    try {
-                        Thread.sleep(REQUEST_DELAY_MS);
-                        Card card = restTemplate.getForObject((String) cardData.get("uri"), Card.class);
-                        if (card != null) {
-                            cards.add(card);
-                        }
-                    } catch (HttpClientErrorException e) {
-                        if (e.getStatusCode().value() == 429) {
-                            System.err.println("Rate limit exceeded when fetching card details: " + e.getMessage());
-                            model.addAttribute("error", "Rate limit exceeded when fetching card details. Please try again later.");
-                            break;
-                        }
-                    }
+                    Card card = new Card();
+                    card.setName((String) cardData.get("name"));
+                    card.setManaCost((String) cardData.get("mana_cost"));
+                    card.setTypeLine((String) cardData.get("type_line"));
+                    card.setOracleText((String) cardData.get("oracle_text"));
+
+                    // Safely handle prices and image URIs
+                    Map<String, Object> pricesMap = (Map<String, Object>) cardData.get("prices");
+                    Map<String, Object> imageUrisMap = (Map<String, Object>) cardData.get("image_uris");
+
+                    card.setUsd(pricesMap != null ? (String) pricesMap.get("usd") : null);
+                    card.setUsdFoil(pricesMap != null ? (String) pricesMap.get("usd_foil") : null);
+                    card.setImageUrl(imageUrisMap != null ? (String) imageUrisMap.get("normal") : null);
+
+                    cards.add(card);
                 }
             } else {
                 model.addAttribute("error", "No cards matched your search criteria. Please try again with different terms.");
             }
 
-            // Pass pagination info to the model
             model.addAttribute("cards", cards);
             model.addAttribute("currentPage", page);
             model.addAttribute("hasMorePages", response != null && Boolean.TRUE.equals(response.get("has_more")));
@@ -119,7 +120,7 @@ public class CardController {
             Thread.currentThread().interrupt();
         }
 
-        System.out.println("API URL: " + url);
+        // Make sure to return the "results" view to display the search results
         return "results";
     }
 

@@ -165,9 +165,9 @@
 
     <!-- Pagination controls -->
     <div class="pagination">
-        <a th:if="${currentPage > 1}" th:href="@{/search(query=${query}, page=${currentPage - 1})}">Previous</a>
+        <a th:if="${currentPage > 1}" th:href="@{/search(query=${query}, type=${type}, set=${set}, color=${color}, rarity=${rarity}, isLegendary=${isLegendary}, isLand=${isLand}, page=${currentPage - 1})}">Previous</a>
         <span class="current-page" th:text="'Page ' + ${currentPage}"></span>
-        <a th:if="${hasMorePages}" th:href="@{/search(query=${query}, page=${currentPage + 1})}">Next</a>
+        <a th:if="${hasMorePages}" th:href="@{/search(query=${query}, type=${type}, set=${set}, color=${color}, rarity=${rarity}, isLegendary=${isLegendary}, isLand=${isLand}, page=${currentPage + 1})}">Next</a>
     </div>
 </div>
 </body>
