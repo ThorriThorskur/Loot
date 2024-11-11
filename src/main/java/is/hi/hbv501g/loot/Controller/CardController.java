@@ -13,7 +13,6 @@ import org.springframework.web.client.RestTemplate;
 
 import jakarta.servlet.http.HttpSession;
 
-
 @Controller
 public class CardController {
 
@@ -24,9 +23,16 @@ public class CardController {
     private RestTemplate restTemplate;
 
     private static final int REQUEST_DELAY_MS = 100;
-    private static final int CARDS_PER_PAGE = 5;
+    private static final int CARDS_PER_PAGE = 12;
 
-    // Initial Search and Caching
+    // Display search page (GET request)
+    @GetMapping("/search")
+    public String showSearchPage(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        model.addAttribute("username", userDetails != null ? userDetails.getUsername() : "Guest");
+        return "search"; // Make sure there is a Thymeleaf template named "search.html"
+    }
+
+    // Perform search and cache results (POST request)
     @PostMapping("/search")
     public String performSearch(
             @RequestParam("query") String query,
@@ -38,7 +44,6 @@ public class CardController {
             @RequestParam(value = "isLand", required = false) Boolean isLand,
             Model model, HttpSession session) {
 
-        // Fetch and Cache Results
         StringBuilder urlBuilder = new StringBuilder("https://api.scryfall.com/cards/search?q=");
         if (!query.trim().isEmpty()) urlBuilder.append(query.trim());
         if (type != null && !type.isEmpty()) urlBuilder.append("+t:").append(type);
@@ -117,3 +122,4 @@ public class CardController {
         model.addAttribute("error", "There was an issue fetching data from Scryfall. Please try again later.");
     }
 }
+

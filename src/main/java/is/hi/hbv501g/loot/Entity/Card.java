@@ -6,8 +6,6 @@ import jakarta.persistence.*;
 
 import java.util.Map;
 
-
-
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Card {
@@ -18,6 +16,10 @@ public class Card {
     private String name;
     private String mana_cost; // Snake case field name
     private String type_line;
+
+    @Column(columnDefinition = "TEXT") // Use TEXT or LONGTEXT for larger text capacity
+    private String oracleText;
+
     private boolean isLegendary;
     private boolean isLand;
 
@@ -27,21 +29,18 @@ public class Card {
     @Transient
     private String usd_foil;
 
-    @Lob
-    private String oracle_text;
-
     private String imageUrl;
 
     // Constructors
     public Card() {
     }
 
-    public Card(String id, String name, String mana_cost, String type_line, String oracle_text, String imageUrl, boolean isLegendary, boolean isLand) {
+    public Card(String id, String name, String mana_cost, String type_line, String oracleText, String imageUrl, boolean isLegendary, boolean isLand) {
         this.id = id;
         this.name = name;
         this.mana_cost = mana_cost;
         this.type_line = type_line;
-        this.oracle_text = oracle_text;
+        this.oracleText = oracleText;
         this.imageUrl = imageUrl;
         this.isLegendary = isLegendary;
         this.isLand = isLand;
@@ -81,11 +80,11 @@ public class Card {
     }
 
     public String getOracleText() {
-        return oracle_text;
+        return oracleText;
     }
 
-    public void setOracleText(String oracle_text) {
-        this.oracle_text = oracle_text;
+    public void setOracleText(String oracleText) {
+        this.oracleText = oracleText;
     }
 
     public String getImageUrl() {
