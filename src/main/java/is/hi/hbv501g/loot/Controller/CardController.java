@@ -66,27 +66,10 @@ public class CardController {
             @RequestParam(value = "rarity", required = false) String rarity,
             @RequestParam(value = "isLegendary", required = false) Boolean isLegendary,
             @RequestParam(value = "isLand", required = false) Boolean isLand,
-            @RequestParam(value = "nextPageUrl", required = false) String nextPageUrl, // URL for the next page
+            @RequestParam(value = "nextPageUrl", required = false) String nextPageUrl, // URL for next page from response
             Model model) {
 
-        String url;
-        if (nextPageUrl != null && !nextPageUrl.isEmpty()) {
-            // Use the provided nextPageUrl for pagination
-            url = nextPageUrl;
-        } else {
-            // Construct the initial search URL
-            StringBuilder urlBuilder = new StringBuilder("https://api.scryfall.com/cards/search?q=");
-            if (!query.trim().isEmpty()) urlBuilder.append(query.trim());
-
-            if (type != null && !type.isEmpty()) urlBuilder.append("+t:").append(type);
-            if (set != null && !set.isEmpty()) urlBuilder.append("+e:").append(set);
-            if (color != null && !color.isEmpty()) urlBuilder.append("+c:").append(color);
-            if (rarity != null && !rarity.isEmpty()) urlBuilder.append("+r:").append(rarity);
-            if (isLegendary != null && isLegendary) urlBuilder.append("+t:legendary");
-            if (isLand != null && isLand) urlBuilder.append("+t:land");
-
-            url = urlBuilder.toString();
-        }
+        String url = nextPageUrl != null && !nextPageUrl.isEmpty() ? nextPageUrl : buildInitialSearchUrl(query, type, set, color, rarity, isLegendary, isLand);
 
         try {
             Thread.sleep(REQUEST_DELAY_MS);
@@ -96,26 +79,14 @@ public class CardController {
             if (response != null && response.containsKey("data")) {
                 List<Map<String, Object>> data = (List<Map<String, Object>>) response.get("data");
                 for (Map<String, Object> cardData : data) {
-                    Card card = new Card();
-                    card.setName((String) cardData.get("name"));
-                    card.setManaCost((String) cardData.get("mana_cost"));
-                    card.setTypeLine((String) cardData.get("type_line"));
-                    card.setOracleText((String) cardData.get("oracle_text"));
-
-                    // Safely handle prices and image URIs
-                    Map<String, Object> pricesMap = (Map<String, Object>) cardData.get("prices");
-                    Map<String, Object> imageUrisMap = (Map<String, Object>) cardData.get("image_uris");
-
-                    card.setUsd(pricesMap != null ? (String) pricesMap.get("usd") : null);
-                    card.setUsdFoil(pricesMap != null ? (String) pricesMap.get("usd_foil") : null);
-                    card.setImageUrl(imageUrisMap != null ? (String) imageUrisMap.get("normal") : null);
-
+                    Card card = createCardFromResponseData(cardData);
                     cards.add(card);
                 }
             } else {
                 model.addAttribute("error", "No cards matched your search criteria. Please try again with different terms.");
             }
 
+            // Set cards and pagination data in the model
             model.addAttribute("cards", cards);
             model.addAttribute("hasMorePages", response != null && Boolean.TRUE.equals(response.get("has_more")));
             model.addAttribute("nextPageUrl", response != null ? response.get("next_page") : null);
@@ -127,6 +98,37 @@ public class CardController {
         }
 
         return "results";
+    }
+
+    private String buildInitialSearchUrl(String query, String type, String set, String color, String rarity, Boolean isLegendary, Boolean isLand) {
+        StringBuilder urlBuilder = new StringBuilder("https://api.scryfall.com/cards/search?q=");
+        if (!query.trim().isEmpty()) urlBuilder.append(query.trim());
+
+        if (type != null && !type.isEmpty()) urlBuilder.append("+t:").append(type);
+        if (set != null && !set.isEmpty()) urlBuilder.append("+e:").append(set);
+        if (color != null && !color.isEmpty()) urlBuilder.append("+c:").append(color);
+        if (rarity != null && !rarity.isEmpty()) urlBuilder.append("+r:").append(rarity);
+        if (isLegendary != null && isLegendary) urlBuilder.append("+t:legendary");
+        if (isLand != null && isLand) urlBuilder.append("+t:land");
+
+        return urlBuilder.toString();
+    }
+
+    private Card createCardFromResponseData(Map<String, Object> cardData) {
+        Card card = new Card();
+        card.setName((String) cardData.get("name"));
+        card.setManaCost((String) cardData.get("mana_cost"));
+        card.setTypeLine((String) cardData.get("type_line"));
+        card.setOracleText((String) cardData.get("oracle_text"));
+
+        Map<String, Object> pricesMap = (Map<String, Object>) cardData.get("prices");
+        Map<String, Object> imageUrisMap = (Map<String, Object>) cardData.get("image_uris");
+
+        card.setUsd(pricesMap != null ? (String) pricesMap.get("usd") : null);
+        card.setUsdFoil(pricesMap != null ? (String) pricesMap.get("usd_foil") : null);
+        card.setImageUrl(imageUrisMap != null ? (String) imageUrisMap.get("normal") : null);
+
+        return card;
     }
 
 
