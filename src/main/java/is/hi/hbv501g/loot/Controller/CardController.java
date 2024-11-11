@@ -30,14 +30,13 @@ public class CardController {
         String setsUrl = "https://api.scryfall.com/sets";
 
         try {
-            // Fetch card types from the API
+            // Fetch card types and sets
             Thread.sleep(REQUEST_DELAY_MS);
             Map<String, Object> cardTypesResponse = restTemplate.getForObject(cardTypesUrl, Map.class);
             List<String> cardTypes = cardTypesResponse != null && cardTypesResponse.containsKey("data")
                     ? (List<String>) cardTypesResponse.get("data")
                     : new ArrayList<>();
 
-            // Fetch sets from the API
             Thread.sleep(REQUEST_DELAY_MS);
             Map<String, Object> setsResponse = restTemplate.getForObject(setsUrl, Map.class);
             List<Map<String, String>> sets = setsResponse != null && setsResponse.containsKey("data")
@@ -46,8 +45,6 @@ public class CardController {
 
             model.addAttribute("cardTypes", cardTypes);
             model.addAttribute("sets", sets);
-
-            // Ensure userDetails is not null before accessing username
             model.addAttribute("username", userDetails != null ? userDetails.getUsername() : "Guest");
 
         } catch (HttpClientErrorException e) {
@@ -68,15 +65,11 @@ public class CardController {
             @RequestParam(value = "rarity", required = false) String rarity,
             @RequestParam(value = "isLegendary", required = false) Boolean isLegendary,
             @RequestParam(value = "isLand", required = false) Boolean isLand,
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page, // Pagination
             Model model) {
 
-        // Initialize the query URL
         StringBuilder urlBuilder = new StringBuilder("https://api.scryfall.com/cards/search?q=");
-
-        // Append search terms if they exist
-        if (!query.trim().isEmpty()) {
-            urlBuilder.append(query.trim());
-        }
+        if (!query.trim().isEmpty()) urlBuilder.append(query.trim());
 
         if (type != null && !type.isEmpty()) urlBuilder.append("+t:").append(type);
         if (set != null && !set.isEmpty()) urlBuilder.append("+e:").append(set);
@@ -85,6 +78,8 @@ public class CardController {
         if (isLegendary != null && isLegendary) urlBuilder.append("+t:legendary");
         if (isLand != null && isLand) urlBuilder.append("+t:land");
 
+        // Add page parameter for pagination
+        urlBuilder.append("&page=").append(page);
         String url = urlBuilder.toString();
 
         try {
@@ -113,18 +108,13 @@ public class CardController {
                 model.addAttribute("error", "No cards matched your search criteria. Please try again with different terms.");
             }
 
+            // Pass pagination info to the model
             model.addAttribute("cards", cards);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("hasMorePages", response != null && Boolean.TRUE.equals(response.get("has_more")));
+
         } catch (HttpClientErrorException e) {
-            if (e.getStatusCode().value() == 404 && e.getResponseBodyAsString().contains("not_found")) {
-                System.err.println("No cards matched search criteria: " + e.getMessage());
-                model.addAttribute("error", "No cards matched your search criteria. Please try again with different terms.");
-            } else if (e.getStatusCode().value() == 429) {
-                System.err.println("Rate limit exceeded: " + e.getMessage());
-                model.addAttribute("error", "Rate limit exceeded. Please try again later.");
-            } else {
-                System.err.println("Error fetching search results from Scryfall API: " + e.getMessage());
-                model.addAttribute("error", "There was an issue fetching data from Scryfall. Please try again later.");
-            }
+            handleHttpClientErrorException(e, model);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

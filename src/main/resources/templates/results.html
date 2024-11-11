@@ -86,6 +86,35 @@
             margin: 20px 0;
         }
 
+        /* Pagination controls */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pagination a, .pagination span {
+            padding: 8px 16px;
+            text-decoration: none;
+            color: #007bff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .pagination a:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .pagination span.current-page {
+            font-weight: bold;
+            background-color: #007bff;
+            color: #fff;
+        }
+
         /* Responsive styling */
         @media (max-width: 600px) {
             .results-container {
@@ -133,6 +162,13 @@
             <hr/>
         </li>
     </ul>
+
+    <!-- Pagination controls -->
+    <div class="pagination">
+        <a th:if="${currentPage > 1}" th:href="@{/search(query=${query}, page=${currentPage - 1})}">Previous</a>
+        <span class="current-page" th:text="'Page ' + ${currentPage}"></span>
+        <a th:if="${hasMorePages}" th:href="@{/search(query=${query}, page=${currentPage + 1})}">Next</a>
+    </div>
 </div>
 </body>
 </html>
