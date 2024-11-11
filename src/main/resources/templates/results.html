@@ -2,6 +2,17 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Search Results</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; color: #333; display: flex; justify-content: center; padding: 20px; }
+        .results-container { max-width: 800px; width: 100%; }
+        h1 { text-align: center; margin-bottom: 20px; color: #333; }
+        .card-item { background-color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); margin-bottom: 20px; padding: 15px; }
+        .card-item img { width: 100%; max-width: 200px; border-radius: 5px; }
+        .pagination { text-align: center; margin-top: 20px; display: flex; justify-content: center; gap: 5px; }
+        .pagination a { padding: 10px 15px; border: 1px solid #ddd; border-radius: 5px; text-decoration: none; color: #333; }
+        .pagination a.active, .pagination a:hover { background-color: #007bff; color: white; }
+        .pagination span { padding: 10px 15px; }
+    </style>
 </head>
 <body>
 <div class="results-container">
@@ -9,28 +20,23 @@
     <ul>
         <li class="card-item" th:each="card : ${cards}">
             <h2 th:text="${card.name}"></h2>
-            <div class="card-details">
-                <p><strong>Mana Cost:</strong> <span th:text="${card.manaCost}">N/A</span></p>
-                <p><strong>Type:</strong> <span th:text="${card.typeLine}">N/A</span></p>
-                <p><strong>Oracle Text:</strong> <span th:text="${card.oracleText}">N/A</span></p>
-                <p><strong>Price:</strong> <span th:text="${card.usd != null ? '$' + card.usd : 'N/A'}">N/A</span></p>
-                <p><strong>Foil Price:</strong> <span th:text="${card.usdFoil != null ? '$' + card.usdFoil : 'N/A'}">N/A</span></p>
-            </div>
-
-            <div th:if="${card.imageUrl != null}">
-                <img th:src="${card.imageUrl}" alt="Card Image" />
-            </div>
-            <div th:unless="${card.imageUrl != null}">
-                <p>No image available.</p>
-            </div>
+            <div><strong>Mana Cost:</strong> <span th:text="${card.manaCost}">N/A</span></div>
+            <div><strong>Type:</strong> <span th:text="${card.typeLine}">N/A</span></div>
+            <div><strong>Oracle Text:</strong> <span th:text="${card.oracleText}">N/A</span></div>
+            <div><strong>Price:</strong> <span th:text="${card.usd != null ? '$' + card.usd : 'N/A'}">N/A</span></div>
+            <div><strong>Foil Price:</strong> <span th:text="${card.usdFoil != null ? '$' + card.usdFoil : 'N/A'}">N/A</span></div>
+            <div th:if="${card.imageUrl != null}"><img th:src="${card.imageUrl}" alt="Card Image" /></div>
+            <div th:unless="${card.imageUrl != null}">No image available.</div>
         </li>
     </ul>
 
-    <!-- Pagination Controls -->
+    <!-- Dynamic Pagination -->
     <div class="pagination">
         <a th:if="${currentPage > 1}" th:href="@{/search/page/{page}(page=${currentPage - 1})}">Previous</a>
-        <span>Page <span th:text="${currentPage}"></span></span>
-        <a th:if="${hasMorePages}" th:href="@{/search/page/{page}(page=${currentPage + 1})}">Next</a>
+        <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+            <a th:href="@{/search/page/{page}(page=${i})}" th:text="${i}" th:classappend="${i == currentPage ? 'active' : ''}"></a>
+        </span>
+        <a th:if="${currentPage < totalPages}" th:href="@{/search/page/{page}(page=${currentPage + 1})}">Next</a>
     </div>
 </div>
 </body>

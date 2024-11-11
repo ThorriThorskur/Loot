@@ -23,41 +23,10 @@ public class CardController {
     @Autowired
     private RestTemplate restTemplate;
 
-    private static final int REQUEST_DELAY_MS = 100; // Delay between requests in milliseconds
-    private static final int CARDS_PER_PAGE = 5; // Number of cards to show per page
+    private static final int REQUEST_DELAY_MS = 100;
+    private static final int CARDS_PER_PAGE = 5;
 
-    @GetMapping("/search")
-    public String searchCards(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        String cardTypesUrl = "https://api.scryfall.com/catalog/card-types";
-        String setsUrl = "https://api.scryfall.com/sets";
-
-        try {
-            // Fetch card types and sets
-            Thread.sleep(REQUEST_DELAY_MS);
-            Map<String, Object> cardTypesResponse = restTemplate.getForObject(cardTypesUrl, Map.class);
-            List<String> cardTypes = cardTypesResponse != null && cardTypesResponse.containsKey("data")
-                    ? (List<String>) cardTypesResponse.get("data")
-                    : new ArrayList<>();
-
-            Thread.sleep(REQUEST_DELAY_MS);
-            Map<String, Object> setsResponse = restTemplate.getForObject(setsUrl, Map.class);
-            List<Map<String, String>> sets = setsResponse != null && setsResponse.containsKey("data")
-                    ? (List<Map<String, String>>) setsResponse.get("data")
-                    : new ArrayList<>();
-
-            model.addAttribute("cardTypes", cardTypes);
-            model.addAttribute("sets", sets);
-            model.addAttribute("username", userDetails != null ? userDetails.getUsername() : "Guest");
-
-        } catch (HttpClientErrorException e) {
-            handleHttpClientErrorException(e, model);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        return "search";
-    }
-
+    // Initial Search and Caching
     @PostMapping("/search")
     public String performSearch(
             @RequestParam("query") String query,
@@ -69,10 +38,9 @@ public class CardController {
             @RequestParam(value = "isLand", required = false) Boolean isLand,
             Model model, HttpSession session) {
 
-        // Build the search URL
+        // Fetch and Cache Results
         StringBuilder urlBuilder = new StringBuilder("https://api.scryfall.com/cards/search?q=");
         if (!query.trim().isEmpty()) urlBuilder.append(query.trim());
-
         if (type != null && !type.isEmpty()) urlBuilder.append("+t:").append(type);
         if (set != null && !set.isEmpty()) urlBuilder.append("+e:").append(set);
         if (color != null && !color.isEmpty()) urlBuilder.append("+c:").append(color);
@@ -80,53 +48,50 @@ public class CardController {
         if (isLegendary != null && isLegendary) urlBuilder.append("+t:legendary");
         if (isLand != null && isLand) urlBuilder.append("+t:land");
 
-        String url = urlBuilder.toString();
-
         try {
             Thread.sleep(REQUEST_DELAY_MS);
-            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
-
+            Map<String, Object> response = restTemplate.getForObject(urlBuilder.toString(), Map.class);
             List<Card> cards = new ArrayList<>();
             if (response != null && response.containsKey("data")) {
                 List<Map<String, Object>> data = (List<Map<String, Object>>) response.get("data");
                 for (Map<String, Object> cardData : data) {
-                    Card card = createCardFromResponseData(cardData);
-                    cards.add(card);
+                    cards.add(createCardFromResponseData(cardData));
                 }
-                // Store all results in session
                 session.setAttribute("cachedCards", cards);
-            } else {
-                model.addAttribute("error", "No cards matched your search criteria. Please try again with different terms.");
             }
 
-            // Display the first page (first CARDS_PER_PAGE cards)
+            int totalCards = cards.size();
+            int totalPages = (int) Math.ceil((double) totalCards / CARDS_PER_PAGE);
+
+            model.addAttribute("totalPages", totalPages);
+            model.addAttribute("currentPage", 1);
+
             return showPaginatedResults(1, model, session);
 
-        } catch (HttpClientErrorException e) {
+        } catch (HttpClientErrorException | InterruptedException e) {
             handleHttpClientErrorException(e, model);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         }
 
         return "results";
     }
 
+    // Paginate from cached data
     @GetMapping("/search/page/{page}")
     public String showPaginatedResults(@PathVariable("page") int page, Model model, HttpSession session) {
         List<Card> cachedCards = (List<Card>) session.getAttribute("cachedCards");
-
         if (cachedCards == null || cachedCards.isEmpty()) {
             model.addAttribute("error", "No search results found. Please perform a search.");
             return "results";
         }
 
+        int totalCards = cachedCards.size();
+        int totalPages = (int) Math.ceil((double) totalCards / CARDS_PER_PAGE);
         int start = (page - 1) * CARDS_PER_PAGE;
-        int end = Math.min(start + CARDS_PER_PAGE, cachedCards.size());
-        List<Card> paginatedCards = cachedCards.subList(start, end);
+        int end = Math.min(start + CARDS_PER_PAGE, totalCards);
 
-        model.addAttribute("cards", paginatedCards);
+        model.addAttribute("cards", cachedCards.subList(start, end));
+        model.addAttribute("totalPages", totalPages);
         model.addAttribute("currentPage", page);
-        model.addAttribute("hasMorePages", end < cachedCards.size());
 
         return "results";
     }
@@ -148,11 +113,7 @@ public class CardController {
         return card;
     }
 
-    private void handleHttpClientErrorException(HttpClientErrorException e, Model model) {
-        if (e.getStatusCode().value() == 429) {
-            model.addAttribute("error", "Rate limit exceeded. Please try again later.");
-        } else {
-            model.addAttribute("error", "There was an issue fetching data from Scryfall. Please try again later.");
-        }
+    private void handleHttpClientErrorException(Exception e, Model model) {
+        model.addAttribute("error", "There was an issue fetching data from Scryfall. Please try again later.");
     }
 }
