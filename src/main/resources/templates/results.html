@@ -2,134 +2,6 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Search Results</title>
-    <style>
-        /* Reset basic styling */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
-        /* Layout styling */
-        body {
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-            background-image: url(/data/background.png);
-            background-size: cover;
-            background-position: center;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-
-        /* Container for search results */
-        .results-container {
-            max-width: 800px;
-            width: 100%;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 2em;
-            margin-bottom: 20px;
-        }
-
-        /* Styling each card entry */
-        .card-item {
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        .card-item h2 {
-            font-size: 1.5em;
-            color: #007bff;
-            margin-bottom: 10px;
-        }
-
-        .card-details p {
-            margin: 5px 0;
-            font-size: 1em;
-        }
-
-        /* Styling card image */
-        .card-image img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 5px;
-            margin: 10px 0;
-        }
-
-        /* Add to inventory button styling */
-        .card-item button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s;
-        }
-
-        .card-item button:hover {
-            background-color: #0056b3;
-        }
-
-        /* Divider line between cards */
-        hr {
-            border: 0;
-            border-top: 1px solid #ddd;
-            margin: 20px 0;
-        }
-
-        /* Pagination controls */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .pagination a, .pagination span {
-            padding: 8px 16px;
-            text-decoration: none;
-            color: #007bff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .pagination a:hover {
-            background-color: #007bff;
-            color: #fff;
-        }
-
-        .pagination span.current-page {
-            font-weight: bold;
-            background-color: #007bff;
-            color: #fff;
-        }
-
-        /* Responsive styling */
-        @media (max-width: 600px) {
-            .results-container {
-                padding: 0 10px;
-            }
-
-            h1 {
-                font-size: 1.5em;
-            }
-
-            .card-item h2 {
-                font-size: 1.2em;
-            }
-        }
-    </style>
 </head>
 <body>
 <div class="results-container">
@@ -145,29 +17,20 @@
                 <p><strong>Foil Price:</strong> <span th:text="${card.usdFoil != null ? '$' + card.usdFoil : 'N/A'}">N/A</span></p>
             </div>
 
-            <!-- Card image display -->
-            <div class="card-image" th:if="${card.imageUrl != null}">
-                <img th:src="${card.imageUrl}" alt="Card Image"/>
+            <div th:if="${card.imageUrl != null}">
+                <img th:src="${card.imageUrl}" alt="Card Image" />
             </div>
             <div th:unless="${card.imageUrl != null}">
                 <p>No image available.</p>
             </div>
-
-            <!-- Add to inventory form -->
-            <form th:action="@{/addCardToInventory}" method="post">
-                <input type="hidden" name="cardId" th:value="${card.id}" />
-                <input type="hidden" name="userId" th:value="${userId}" />
-                <button type="submit">Add to Inventory</button>
-            </form>
-            <hr/>
         </li>
     </ul>
 
-    <!-- Pagination controls -->
+    <!-- Pagination Controls -->
     <div class="pagination">
-        <a th:if="${currentPage > 1}" th:href="@{/search(query=${query}, type=${type}, set=${set}, color=${color}, rarity=${rarity}, isLegendary=${isLegendary}, isLand=${isLand}, page=${currentPage - 1})}">Previous</a>
-        <span class="current-page" th:text="'Page ' + ${currentPage}"></span>
-        <a th:if="${hasMorePages}" th:href="@{/search(query=${query}, type=${type}, set=${set}, color=${color}, rarity=${rarity}, isLegendary=${isLegendary}, isLand=${isLand}, page=${currentPage + 1})}">Next</a>
+        <a th:if="${currentPage > 1}" th:href="@{/search(page=${currentPage - 1})}">Previous</a>
+        <span>Page <span th:text="${currentPage}"></span></span>
+        <a th:if="${hasMorePages}" th:href="@{/search(page=${currentPage + 1})}">Next</a>
     </div>
 </div>
 </body>

@@ -56,6 +56,7 @@ public class CardController {
         return "search";
     }
 
+
     @PostMapping("/search")
     public String performSearch(
             @RequestParam("query") String query,
@@ -65,22 +66,27 @@ public class CardController {
             @RequestParam(value = "rarity", required = false) String rarity,
             @RequestParam(value = "isLegendary", required = false) Boolean isLegendary,
             @RequestParam(value = "isLand", required = false) Boolean isLand,
-            @RequestParam(value = "page", required = false, defaultValue = "1") int page, // Pagination
+            @RequestParam(value = "nextPageUrl", required = false) String nextPageUrl, // URL for the next page
             Model model) {
 
-        StringBuilder urlBuilder = new StringBuilder("https://api.scryfall.com/cards/search?q=");
-        if (!query.trim().isEmpty()) urlBuilder.append(query.trim());
+        String url;
+        if (nextPageUrl != null && !nextPageUrl.isEmpty()) {
+            // Use the provided nextPageUrl for pagination
+            url = nextPageUrl;
+        } else {
+            // Construct the initial search URL
+            StringBuilder urlBuilder = new StringBuilder("https://api.scryfall.com/cards/search?q=");
+            if (!query.trim().isEmpty()) urlBuilder.append(query.trim());
 
-        if (type != null && !type.isEmpty()) urlBuilder.append("+t:").append(type);
-        if (set != null && !set.isEmpty()) urlBuilder.append("+e:").append(set);
-        if (color != null && !color.isEmpty()) urlBuilder.append("+c:").append(color);
-        if (rarity != null && !rarity.isEmpty()) urlBuilder.append("+r:").append(rarity);
-        if (isLegendary != null && isLegendary) urlBuilder.append("+t:legendary");
-        if (isLand != null && isLand) urlBuilder.append("+t:land");
+            if (type != null && !type.isEmpty()) urlBuilder.append("+t:").append(type);
+            if (set != null && !set.isEmpty()) urlBuilder.append("+e:").append(set);
+            if (color != null && !color.isEmpty()) urlBuilder.append("+c:").append(color);
+            if (rarity != null && !rarity.isEmpty()) urlBuilder.append("+r:").append(rarity);
+            if (isLegendary != null && isLegendary) urlBuilder.append("+t:legendary");
+            if (isLand != null && isLand) urlBuilder.append("+t:land");
 
-        // Add page parameter for pagination
-        urlBuilder.append("&page=").append(page);
-        String url = urlBuilder.toString();
+            url = urlBuilder.toString();
+        }
 
         try {
             Thread.sleep(REQUEST_DELAY_MS);
@@ -111,8 +117,8 @@ public class CardController {
             }
 
             model.addAttribute("cards", cards);
-            model.addAttribute("currentPage", page);
             model.addAttribute("hasMorePages", response != null && Boolean.TRUE.equals(response.get("has_more")));
+            model.addAttribute("nextPageUrl", response != null ? response.get("next_page") : null);
 
         } catch (HttpClientErrorException e) {
             handleHttpClientErrorException(e, model);
@@ -120,9 +126,9 @@ public class CardController {
             Thread.currentThread().interrupt();
         }
 
-        // Make sure to return the "results" view to display the search results
         return "results";
     }
+
 
     private void handleHttpClientErrorException(HttpClientErrorException e, Model model) {
         if (e.getStatusCode().value() == 429) {
