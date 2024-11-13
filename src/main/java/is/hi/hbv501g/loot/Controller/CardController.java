@@ -1,6 +1,9 @@
 package is.hi.hbv501g.loot.Controller;
 import java.util.*;
 import is.hi.hbv501g.loot.Entity.Card;
+import is.hi.hbv501g.loot.Entity.Inventory;
+import is.hi.hbv501g.loot.Entity.UserEntity;
+import is.hi.hbv501g.loot.Service.CardService;
 import is.hi.hbv501g.loot.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +21,9 @@ public class CardController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private CardService cardService;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -103,6 +109,13 @@ public class CardController {
 
     private Card createCardFromResponseData(Map<String, Object> cardData) {
         Card card = new Card();
+        card.setId((String) cardData.get("id")); // Make sure to correctly set the ID
+
+        // Log a warning if the card ID is null
+        if (card.getId() == null) {
+            System.err.println("Warning: Card ID is null for card: " + cardData);
+        }
+
         card.setName((String) cardData.get("name"));
         card.setManaCost((String) cardData.get("mana_cost"));
         card.setTypeLine((String) cardData.get("type_line"));
@@ -118,8 +131,57 @@ public class CardController {
         return card;
     }
 
+
     private void handleHttpClientErrorException(Exception e, Model model) {
         model.addAttribute("error", "There was an issue fetching data from Scryfall. Please try again later.");
     }
+
+    @PostMapping("/addCardToInventory")
+    public String addCardToInventory(@RequestParam("cardId") String cardId, @AuthenticationPrincipal UserDetails userDetails, Model model) {
+        if (userDetails == null) {
+            model.addAttribute("error", "User not authenticated.");
+            return "error";
+        }
+
+        Optional<UserEntity> userOptional = userService.findByUsername(userDetails.getUsername());
+        if (!userOptional.isPresent()) {
+            model.addAttribute("error", "User not found.");
+            return "error";
+        }
+
+        UserEntity user = userOptional.get();
+        Inventory inventory = user.getInventory();
+
+        // Fetch the card from the Scryfall API or local repository
+        Optional<Card> cardOptional = cardService.findById(cardId);
+        Card card;
+        if (cardOptional.isPresent()) {
+            card = cardOptional.get();
+        } else {
+            // Card is not found in the local database, so fetch it from the API
+            String url = "https://api.scryfall.com/cards/" + cardId;
+            try {
+                card = restTemplate.getForObject(url, Card.class);
+                if (card == null) {
+                    model.addAttribute("error", "Card not found.");
+                    return "error";
+                }
+
+                // Save the card to the local database
+                cardService.save(card);
+            } catch (Exception e) {
+                model.addAttribute("error", "Error fetching card data.");
+                return "error";
+            }
+        }
+
+        // Add the card to the user's inventory
+        inventory.addCard(card);
+        userService.save(user);
+
+        return "redirect:/user/" + user.getId() + "/inventory";
+    }
+
+
 }
 
