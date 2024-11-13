@@ -27,6 +27,12 @@
             <div><strong>Foil Price:</strong> <span th:text="${card.usdFoil != null ? '$' + card.usdFoil : 'N/A'}">N/A</span></div>
             <div th:if="${card.imageUrl != null}"><img th:src="${card.imageUrl}" alt="Card Image" /></div>
             <div th:unless="${card.imageUrl != null}">No image available.</div>
+
+            <form th:action="@{/addCardToInventory}" method="post">
+                <input type="hidden" name="cardId" th:value="${card.id}" />
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="add-to-inventory-button">Add to Inventory</button>
+            </form>
         </li>
     </ul>
 

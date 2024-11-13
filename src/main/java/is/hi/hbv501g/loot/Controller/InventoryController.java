@@ -40,7 +40,7 @@ public class InventoryController {
         List<InventoryCard> inventoryCards;
 
         // Apply sorting if sortBy parameter is provided
-        if ("manaCost".equalsIgnoreCase(sortBy)) {
+        if ("mana_cost".equalsIgnoreCase(sortBy)) {
             inventoryCards = user.getInventory().getCardsSortedByManaCost();
         } else if ("name".equalsIgnoreCase(sortBy)) {
             inventoryCards = user.getInventory().getCardsSortedByName();
@@ -77,6 +77,44 @@ public class InventoryController {
 
         return "redirect:/user/" + userId + "/inventory";
     }
+
+    @PostMapping("/user/{userId}/inventory/removeCard")
+    public String removeCardFromInventory(@PathVariable Long userId, @RequestParam("cardId") String cardId, Model model) {
+        Optional<UserEntity> userOptional = userService.findById(userId);
+        if (!userOptional.isPresent()) {
+            model.addAttribute("error", "User not found.");
+            return "error";
+        }
+
+        UserEntity user = userOptional.get();
+        // Fetch the user's inventory
+        List<InventoryCard> inventoryCards = user.getInventory().getInventoryCards();
+
+        // Find the card in the inventory
+        Optional<InventoryCard> inventoryCardOptional = inventoryCards.stream()
+                .filter(inventoryCard -> inventoryCard.getCard().getId().equals(cardId))
+                .findFirst();
+
+        if (inventoryCardOptional.isPresent()) {
+            InventoryCard inventoryCard = inventoryCardOptional.get();
+
+            // If there is more than one of the same card, decrease the count
+            if (inventoryCard.getCount() > 1) {
+                inventoryCard.setCount(inventoryCard.getCount() - 1);
+            } else {
+                // Remove the card from the inventory if only one is left
+                inventoryCards.remove(inventoryCard);
+            }
+
+            userService.save(user);
+        } else {
+            model.addAttribute("error", "Card not found in inventory.");
+            return "error";
+        }
+
+        return "redirect:/user/" + userId + "/inventory";
+    }
+
 
 }
 
