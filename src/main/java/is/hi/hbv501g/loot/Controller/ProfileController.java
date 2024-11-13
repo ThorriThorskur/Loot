@@ -22,7 +22,13 @@ public class ProfileController {
     @Autowired
     private UserService userService;
 
-    // Method to display the user profile page
+    /**
+     * Displays the user's profile page.
+     *
+     * @param userDetails The authenticated user's details.
+     * @param model       The model to pass data to the view.
+     * @return The view template for displaying the profile.
+     */
     @GetMapping("/profile")
     public String showProfile(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         Optional<UserEntity> userOptional = userService.findByUsername(userDetails.getUsername());
@@ -44,7 +50,14 @@ public class ProfileController {
         return "profile"; // Render the profile.html page
     }
 
-    // Method to handle uploading profile picture
+    /**
+     * Handles uploading the user's profile picture.
+     *
+     * @param userDetails    The authenticated user's details.
+     * @param profilePicture The uploaded profile picture file.
+     * @param model          The model to pass data to the view.
+     * @return Redirects to the profile page.
+     */
     @PostMapping("/profile/upload")
     public String uploadProfilePicture(@AuthenticationPrincipal UserDetails userDetails,
                                        @RequestParam("profilePicture") MultipartFile profilePicture,
@@ -66,6 +79,14 @@ public class ProfileController {
         return "redirect:/profile";
     }
 
+
+    /**
+     * Handles removing the user's profile picture.
+     *
+     * @param userDetails The authenticated user's details.
+     * @param model       The model to pass data to the view.
+     * @return Redirects to the profile page.
+     */
     @PostMapping("/profile/remove")
     public String removeProfilePicture(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         Optional<UserEntity> userOptional = userService.findByUsername(userDetails.getUsername());

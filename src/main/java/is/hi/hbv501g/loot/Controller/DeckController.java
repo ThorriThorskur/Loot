@@ -24,6 +24,14 @@ public class DeckController {
     @Autowired
     private CardService cardService;
 
+    /**
+     * Displays the user's deck.
+     *
+     * @param userId  The ID of the user.
+     * @param deckId  The ID of the deck.
+     * @param model   The model to pass data to the view.
+     * @return The view template for displaying the deck.
+     */
     @GetMapping("/user/{userId}/deck/{deckId}")
     public String viewDeck(@PathVariable Long userId, @PathVariable Long deckId, Model model) {
         Optional<UserEntity> userOptional = userService.findById(userId);
@@ -48,6 +56,14 @@ public class DeckController {
         return "user_deck"; // This is the view template for displaying the deck
     }
 
+    /**
+     * Adds a card to the user's deck.
+     *
+     * @param cardId  The ID of the card to add.
+     * @param userId  The ID of the user.
+     * @param model   The model to pass data to the view.
+     * @return Redirects to the user's inventory page.
+     */
     @PostMapping("/addCardToDeck")
     public String addCardToDeck(@RequestParam("cardId") String cardId, @RequestParam("userId") Long userId, Model model) {
         Optional<UserEntity> userOptional = userService.findById(userId);
@@ -76,6 +92,13 @@ public class DeckController {
         return "redirect:/user/" + userId + "/inventory";
     }
 
+    /**
+     * Creates a new deck for the user.
+     *
+     * @param userId  The ID of the user.
+     * @param model   The model to pass data to the view.
+     * @return Redirects to the user's inventory page.
+     */
     @PostMapping("/createDeck")
     public String createDeck(@RequestParam("userId") Long userId, Model model) {
         Optional<UserEntity> userOptional = userService.findById(userId);
@@ -96,7 +119,15 @@ public class DeckController {
         return "redirect:/user/" + userId + "/inventory";
     }
 
-    // Method to remove a card from a deck
+    /**
+     * Removes a card from the user's deck.
+     *
+     * @param userId  The ID of the user.
+     * @param deckId  The ID of the deck.
+     * @param cardId  The ID of the card to remove.
+     * @param model   The model to pass data to the view.
+     * @return Redirects to the deck page.
+     */
     @PostMapping("/user/{userId}/deck/{deckId}/removeCard")
     public String removeCardFromDeck(@PathVariable Long userId, @PathVariable Long deckId, @RequestParam("cardId") String cardId, Model model) {
         Optional<UserEntity> userOptional = userService.findById(userId);
@@ -133,7 +164,14 @@ public class DeckController {
         return "redirect:/user/" + userId + "/deck/" + deckId;
     }
 
-    // Method to verify if the deck has at least 30 cards
+    /**
+     * Verifies if the deck has at least 5 cards.
+     *
+     * @param userId  The ID of the user.
+     * @param deckId  The ID of the deck.
+     * @param model   The model to pass data to the view.
+     * @return The view template for the deck with the verification message.
+     */
     @PostMapping("/user/{userId}/deck/{deckId}/verify")
     public String verifyDeck(@PathVariable Long userId, @PathVariable Long deckId, Model model) {
         Optional<UserEntity> userOptional = userService.findById(userId);

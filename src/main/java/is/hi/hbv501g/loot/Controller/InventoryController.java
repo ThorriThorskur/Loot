@@ -26,6 +26,15 @@ public class InventoryController {
     @Autowired
     private CardService cardService;
 
+
+    /**
+     * Displays the inventory of a specific user, with an option to sort the inventory.
+     *
+     * @param userId The ID of the user whose inventory is to be viewed.
+     * @param sortBy The field by which the inventory should be sorted (optional).
+     * @param model  The model to hold attributes for the view.
+     * @return The name of the Thymeleaf template to render the user's inventory.
+     */
     @GetMapping("/user/{userId}/inventory")
     public String viewInventory(@PathVariable Long userId, @RequestParam(value = "sortBy", required = false) String sortBy, Model model) {
         System.out.println("Received request to view inventory for user: " + userId);
@@ -39,7 +48,6 @@ public class InventoryController {
         UserEntity user = userOptional.get();
         List<InventoryCard> inventoryCards;
 
-        // Apply sorting if sortBy parameter is provided
         if ("mana_cost".equalsIgnoreCase(sortBy)) {
             inventoryCards = user.getInventory().getCardsSortedByManaCost();
         } else if ("name".equalsIgnoreCase(sortBy)) {
@@ -53,6 +61,15 @@ public class InventoryController {
         return "user_inventory";
     }
 
+
+    /**
+     * Increments the quantity of a specific card in the user's inventory.
+     *
+     * @param userId The ID of the user whose card quantity is to be incremented.
+     * @param cardId The ID of the card to be incremented.
+     * @param model  The model to hold attributes for the view.
+     * @return Redirects to the user's inventory page.
+     */
     @PostMapping("/user/{userId}/inventory/incrementCard")
     public String incrementCardQuantity(@PathVariable Long userId, @RequestParam("cardId") String cardId, Model model) {
         Optional<UserEntity> userOptional = userService.findById(userId);
@@ -78,6 +95,15 @@ public class InventoryController {
         return "redirect:/user/" + userId + "/inventory";
     }
 
+    /**
+     * Removes a specific card from the user's inventory. If the quantity is greater than one, it decrements the count;
+     * otherwise, it removes the card entirely from the inventory.
+     *
+     * @param userId The ID of the user whose card is to be removed.
+     * @param cardId The ID of the card to be removed.
+     * @param model  The model to hold attributes for the view.
+     * @return Redirects to the user's inventory page.
+     */
     @PostMapping("/user/{userId}/inventory/removeCard")
     public String removeCardFromInventory(@PathVariable Long userId, @RequestParam("cardId") String cardId, Model model) {
         Optional<UserEntity> userOptional = userService.findById(userId);

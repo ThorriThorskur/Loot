@@ -31,14 +31,33 @@ public class CardController {
     private static final int REQUEST_DELAY_MS = 100;
     private static final int CARDS_PER_PAGE = 12;
 
-    // Display search page (GET request)
+    /**
+     * Displays the search page for cards.
+     *
+     * @param model The model to pass data to the view.
+     * @param userDetails The authenticated user's details.
+     * @return The view template for the search page.
+     */
     @GetMapping("/search")
     public String showSearchPage(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         model.addAttribute("username", userDetails != null ? userDetails.getUsername() : "Guest");
         return "search"; // Make sure there is a Thymeleaf template named "search.html"
     }
 
-    // Perform search and cache results (POST request)
+    /**
+     * Performs a search for cards based on the provided filters and caches the results.
+     *
+     * @param query The search query.
+     * @param type The card type filter.
+     * @param set The card set filter.
+     * @param color The card color filter.
+     * @param rarity The card rarity filter.
+     * @param isLegendary Filter to include only legendary cards.
+     * @param isLand Filter to include only land cards.
+     * @param model The model to pass data to the view.
+     * @param session The current HTTP session to cache search results.
+     * @return The paginated results view template.
+     */
     @PostMapping("/search")
     public String performSearch(
             @RequestParam("query") String query,
@@ -86,7 +105,14 @@ public class CardController {
         return "results";
     }
 
-    // Paginate from cached data
+    /**
+     * Displays a specific page of search results
+     *
+     * @param page The page number to display.
+     * @param model The model to pass data to the view.
+     * @param session The current HTTP session to access cached search results.
+     * @return The view template for displaying the paginated results.
+     */
     @GetMapping("/search/page/{page}")
     public String showPaginatedResults(@PathVariable("page") int page, Model model, HttpSession session) {
         List<Card> cachedCards = (List<Card>) session.getAttribute("cachedCards");
@@ -107,6 +133,13 @@ public class CardController {
         return "results";
     }
 
+
+    /**
+     * Creates a Card object from the response data.
+     *
+     * @param cardData A map containing the card data from the API.
+     * @return The Card object created from the response data.
+     */
     private Card createCardFromResponseData(Map<String, Object> cardData) {
         Card card = new Card();
         card.setId((String) cardData.get("id")); // Make sure to correctly set the ID
@@ -136,6 +169,14 @@ public class CardController {
         model.addAttribute("error", "There was an issue fetching data from Scryfall. Please try again later.");
     }
 
+    /**
+     * Adds a card to the user's inventory.
+     *
+     * @param cardId The ID of the card to add.
+     * @param userDetails The user's details.
+     * @param model The model to pass data to the view.
+     * @return Redirects to the user's inventory page.
+     */
     @PostMapping("/addCardToInventory")
     public String addCardToInventory(@RequestParam("cardId") String cardId, @AuthenticationPrincipal UserDetails userDetails, Model model) {
         if (userDetails == null) {
