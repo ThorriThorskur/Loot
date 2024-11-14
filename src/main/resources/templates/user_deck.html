@@ -138,14 +138,50 @@
 <div class="deck-container">
     <h1 th:text="'Deck of ' + ${user.username}"></h1>
     <p>Total Cards in Deck: <span th:text="${deck.deckCards.size()}"></span>/50</p>
+    <div class="search-container">
+        <h3>Search Your Deck</h3>
+        <form th:action="@{/user/{userId}/deck/{deckId}/search(userId=${user.id}, deckId=${deck.id})}" method="get">
+            <label for="query">Card Name or Keyword:</label>
+            <input type="text" id="query" name="query" placeholder="Enter card name or keyword" />
+
+            <label for="color">Mana Color:</label>
+            <select id="color" name="color">
+                <option value="">Select Mana Color</option>
+                <option value="W">White</option>
+                <option value="U">Blue</option>
+                <option value="B">Black</option>
+                <option value="R">Red</option>
+                <option value="G">Green</option>
+            </select>
+
+            <label for="rarity">Card Rarity:</label>
+            <select id="rarity" name="rarity">
+                <option value="">Select Rarity</option>
+                <option value="common">Common</option>
+                <option value="uncommon">Uncommon</option>
+                <option value="rare">Rare</option>
+                <option value="mythic">Mythic</option>
+            </select>
+
+            <label>
+                <input type="checkbox" name="isLegendary" /> Legendary
+            </label>
+            <label>
+                <input type="checkbox" name="isLand" /> Land
+            </label>
+
+            <button type="submit">Search Deck</button>
+        </form>
+    </div>
+
 
     <div th:if="${deck.deckCards.size()} == 0">
         <p>Your deck is empty.</p>
     </div>
     <div th:if="${deck.deckCards.size()} > 0">
         <ul>
-            <li th:each="deckCard : ${deck.deckCards}">
-                <!-- Display the card image -->
+            <li th:each="deckCard : ${deckCards}">
+            <!-- Display the card image -->
                 <div class="card-image" th:if="${deckCard.card.imageUrl != null}">
                     <img th:src="${deckCard.card.imageUrl}" alt="Card Image" />
                 </div>
