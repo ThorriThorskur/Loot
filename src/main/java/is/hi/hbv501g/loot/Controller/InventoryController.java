@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class InventoryController {
@@ -141,6 +142,55 @@ public class InventoryController {
         return "redirect:/user/" + userId + "/inventory";
     }
 
+    @GetMapping("/user/{userId}/inventory/search")
+    public String searchInventory(
+            @PathVariable Long userId,
+            @RequestParam(value = "query", required = false) String query,
+            @RequestParam(value = "color", required = false) String color,
+            @RequestParam(value = "type", required = false) String type,
+            @RequestParam(value = "rarity", required = false) String rarity,
+            @RequestParam(value = "isLegendary", required = false) Boolean isLegendary,
+            @RequestParam(value = "isLand", required = false) Boolean isLand,
+            Model model) {
+
+        Optional<UserEntity> userOptional = userService.findById(userId);
+        if (!userOptional.isPresent()) {
+            model.addAttribute("error", "User not found.");
+            return "error";
+        }
+
+        UserEntity user = userOptional.get();
+        List<InventoryCard> inventoryCards = user.getInventory().getInventoryCards();
+
+        // Apply search filters to the inventory
+        List<InventoryCard> filteredCards = inventoryCards.stream()
+                .filter(card -> {
+                    boolean matches = true;
+
+                    if (query != null && !query.isEmpty()) {
+                        matches &= card.getCard().getName().toLowerCase().contains(query.toLowerCase());
+                    }
+                    if (color != null && !color.isEmpty()) {
+                        matches &= card.getCard().getManaCost() != null && card.getCard().getManaCost().contains(color);
+                    }
+                    if (type != null && !type.isEmpty()) {
+                        matches &= card.getCard().getTypeLine() != null && card.getCard().getTypeLine().toLowerCase().contains(type.toLowerCase());
+                    }
+                    if (isLegendary != null && isLegendary) {
+                        matches &= card.getCard().isLegendary();
+                    }
+                    if (isLand != null && isLand) {
+                        matches &= card.getCard().isLand();
+                    }
+
+                    return matches;
+                })
+                .collect(Collectors.toList());
+
+        model.addAttribute("user", user);
+        model.addAttribute("inventoryCards", filteredCards);
+        return "user_inventory";
+    }
 
 }
 

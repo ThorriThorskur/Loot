@@ -153,13 +153,48 @@
         </ul>
     </div>
 
-    <!-- Sorting options -->
-    <div class="sort-section">
-        <p>Sort By:
-            <button type="button" data-sort-type="manaCost" onclick="sortInventory('manaCost')">Mana Cost</button> |
-            <button type="button" data-sort-type="name" onclick="sortInventory('name')">Name</button>
-        </p>
+    <div class="search-container">
+        <h3>Search Your Inventory</h3>
+        <form th:action="@{/user/{userId}/inventory/search(userId=${user.id})}" method="get">
+            <label for="query">Card Name or Keyword:</label>
+            <input type="text" id="query" name="query" placeholder="Enter card name or keyword" />
+
+            <label for="color">Mana Color:</label>
+            <select id="color" name="color">
+                <option value="">Select Mana Color</option>
+                <option value="W">White</option>
+                <option value="U">Blue</option>
+                <option value="B">Black</option>
+                <option value="R">Red</option>
+                <option value="G">Green</option>
+            </select>
+
+            <label for="type">Card Type:</label>
+            <select id="type" name="type">
+                <option value="">Select Card Type</option>
+                <!-- Populate card types if needed -->
+            </select>
+
+            <label for="rarity">Card Rarity:</label>
+            <select id="rarity" name="rarity">
+                <option value="">Select Rarity</option>
+                <option value="common">Common</option>
+                <option value="uncommon">Uncommon</option>
+                <option value="rare">Rare</option>
+                <option value="mythic">Mythic</option>
+            </select>
+
+            <label>
+                <input type="checkbox" name="isLegendary" /> Legendary
+            </label>
+            <label>
+                <input type="checkbox" name="isLand" /> Land
+            </label>
+
+            <button type="submit">Search Inventory</button>
+        </form>
     </div>
+
 
 
 

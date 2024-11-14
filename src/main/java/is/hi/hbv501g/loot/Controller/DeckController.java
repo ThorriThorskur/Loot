@@ -13,7 +13,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 public class DeckController {
@@ -33,7 +35,7 @@ public class DeckController {
      * @return The view template for displaying the deck.
      */
     @GetMapping("/user/{userId}/deck/{deckId}")
-    public String viewDeck(@PathVariable Long userId, @PathVariable Long deckId, Model model) {
+    public String viewDeck(@PathVariable Long userId, @PathVariable Long deckId, @RequestParam(value = "color", required = false) String color, @RequestParam(value = "type", required = false) String type, Model model) {
         Optional<UserEntity> userOptional = userService.findById(userId);
         if (!userOptional.isPresent()) {
             model.addAttribute("error", "User not found.");
@@ -51,8 +53,32 @@ public class DeckController {
             return "error";
         }
 
+        List<DeckCard> deckCards;
+
+        // If there are filters, apply them
+        if ((color != null && !color.isEmpty()) || (type != null && !type.isEmpty())) {
+            deckCards = deck.getDeckCards().stream()
+                    .filter(deckCard -> {
+                        boolean matches = true;
+
+                        if (color != null && !color.isEmpty()) {
+                            matches &= deckCard.getCard().getManaCost() != null && deckCard.getCard().getManaCost().contains(color);
+                        }
+                        if (type != null && !type.isEmpty()) {
+                            matches &= deckCard.getCard().getTypeLine() != null && deckCard.getCard().getTypeLine().toLowerCase().contains(type.toLowerCase());
+                        }
+
+                        return matches;
+                    })
+                    .collect(Collectors.toList());
+        } else {
+            // If no filters, use the entire list
+            deckCards = deck.getDeckCards();
+        }
+
         model.addAttribute("user", user);
         model.addAttribute("deck", deck);
+        model.addAttribute("deckCards", deckCards); // Add the complete or filtered list to the model
         return "user_deck"; // This is the view template for displaying the deck
     }
 
@@ -205,6 +231,92 @@ public class DeckController {
 
         return "user_deck"; // Return to the deck view with the verification message
     }
+
+    /**
+     * Searches for cards within the user's deck based on provided filters.
+     *
+     * @param userId The ID of the user.
+     * @param deckId The ID of the deck.
+     * @param query The search query.
+     * @param color The card color filter.
+     * @param rarity The card rarity filter.
+     * @param isLegendary Filter to include only legendary cards.
+     * @param isLand Filter to include only land cards.
+     * @param model The model to pass data to the view.
+     * @return The view template for displaying the filtered deck.
+     */
+    @GetMapping("/user/{userId}/deck/{deckId}/search")
+    public String searchDeck(
+            @PathVariable Long userId,
+            @PathVariable Long deckId,
+            @RequestParam(value = "query", required = false) String query,
+            @RequestParam(value = "color", required = false) String color,
+            @RequestParam(value = "type", required = false) String type,
+            @RequestParam(value = "rarity", required = false) String rarity,
+            @RequestParam(value = "isLegendary", required = false) Boolean isLegendary,
+            @RequestParam(value = "isLand", required = false) Boolean isLand,
+            Model model) {
+
+        Optional<UserEntity> userOptional = userService.findById(userId);
+        if (!userOptional.isPresent()) {
+            model.addAttribute("error", "User not found.");
+            return "error";
+        }
+
+        UserEntity user = userOptional.get();
+        Deck deck = user.getDecks().stream()
+                .filter(d -> d.getId().equals(deckId))
+                .findFirst()
+                .orElse(null);
+
+        if (deck == null) {
+            model.addAttribute("error", "Deck not found.");
+            return "error";
+        }
+
+        // Apply search filters to the deck cards
+        List<DeckCard> filteredDeckCards = deck.getDeckCards().stream()
+                .filter(deckCard -> {
+                    Card card = deckCard.getCard();
+                    boolean matches = true;
+
+                    // Check card name matches query if query is provided
+                    if (query != null && !query.isEmpty()) {
+                        matches &= card.getName() != null && card.getName().toLowerCase().contains(query.toLowerCase());
+                    }
+
+                    // Check mana color if provided
+                    if (color != null && !color.isEmpty()) {
+                        matches &= card.getManaCost() != null && card.getManaCost().contains(color);
+                    }
+
+                    // Check type if provided
+                    if (type != null && !type.isEmpty()) {
+                        matches &= card.getTypeLine() != null && card.getTypeLine().toLowerCase().contains(type.toLowerCase());
+                    }
+
+
+                    // Check if card is legendary
+                    if (isLegendary != null && isLegendary) {
+                        matches &= card.isLegendary();
+                    }
+
+                    // Check if card is a land
+                    if (isLand != null && isLand) {
+                        matches &= card.isLand();
+                    }
+
+                    return matches;
+                })
+                .collect(Collectors.toList());
+
+        model.addAttribute("user", user);
+        model.addAttribute("deck", deck);
+        model.addAttribute("deckCards", filteredDeckCards); // Make sure to add the filtered list to the model
+
+        return "user_deck";
+    }
+
 
 
 }
