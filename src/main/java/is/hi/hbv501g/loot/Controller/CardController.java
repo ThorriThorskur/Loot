@@ -39,9 +39,41 @@ public class CardController {
      * @return The view template for the search page.
      */
     @GetMapping("/search")
-    public String showSearchPage(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        model.addAttribute("username", userDetails != null ? userDetails.getUsername() : "Guest");
-        return "search"; // Make sure there is a Thymeleaf template named "search.html"
+    public String searchCards(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        String cardTypesUrl = "https://api.scryfall.com/catalog/card-types";
+        String setsUrl = "https://api.scryfall.com/sets";
+
+        try {
+            // Delay between requests
+            Thread.sleep(REQUEST_DELAY_MS);
+            Map<String, Object> cardTypesResponse = restTemplate.getForObject(cardTypesUrl, Map.class);
+            List<String> cardTypes = cardTypesResponse != null && cardTypesResponse.containsKey("data")
+                    ? (List<String>) cardTypesResponse.get("data")
+                    : new ArrayList<>();
+
+            Thread.sleep(REQUEST_DELAY_MS);
+            Map<String, Object> setsResponse = restTemplate.getForObject(setsUrl, Map.class);
+            List<Map<String, String>> sets = setsResponse != null && setsResponse.containsKey("data")
+                    ? (List<Map<String, String>>) setsResponse.get("data")
+                    : new ArrayList<>();
+
+            model.addAttribute("cardTypes", cardTypes);
+            model.addAttribute("sets", sets);
+            model.addAttribute("username", userDetails.getUsername());
+
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode().value() == 429) { // Handle rate limit error
+                System.err.println("Rate limit exceeded: " + e.getMessage());
+                model.addAttribute("error", "Rate limit exceeded. Please try again later.");
+            } else {
+                System.err.println("Error fetching data from Scryfall API: " + e.getMessage());
+                model.addAttribute("error", "There was an issue fetching data from Scryfall. Please try again later.");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        return "search";
     }
 
     /**
