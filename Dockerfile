@@ -27,8 +27,6 @@ RUN mvn clean package -DskipTests
 
 # Expose the application's port \
 EXPOSE 8080
-server.port=${PORT:8080}
-
 
 # Run the application
 CMD ["java", "-jar", "target/loot-1.0.0.jar"]
