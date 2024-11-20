@@ -18,9 +18,8 @@ RUN apt-get update && \
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the Maven project files into the container
-COPY pom.xml .
-COPY src ./src
+# Copy the entire project into the container
+COPY . .
 
 # Build the application
 RUN mvn clean package -DskipTests
