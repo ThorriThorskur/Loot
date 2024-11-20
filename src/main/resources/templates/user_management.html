@@ -3,7 +3,84 @@
 <head>
   <title>User Management</title>
   <style>
-    /* ... (previous CSS remains the same) ... */
+    /* Reset basic styling */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Layout styling */
+    body {
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      background-color: #f4f4f9;
+      background-image: url(/data/background.png);
+      background-size: cover;
+      background-position: center;
+      color: #333;
+    }
+
+    /* Container styling */
+    .management-container {
+      width: 100%;
+      max-width: 900px;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* Table styling */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #007bff;
+      color: #fff;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    /* Action links styling */
+    .action-links a {
+      color: #007bff;
+      text-decoration: none;
+      margin: 0 5px;
+      transition: color 0.3s;
+    }
+
+    .action-links a:hover {
+      color: #0056b3;
+    }
+
+    /* Responsive design */
+    @media (max-width: 600px) {
+      .management-container {
+        width: 90%;
+      }
+
+      table, th, td {
+        font-size: 0.9em;
+      }
+    }
 
     /* Modal styling for confirmation */
     .modal {
