@@ -18,8 +18,8 @@ RUN apt-get update && \
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the entire project into the container
-COPY . .
+# Copy the entire project into the container with specific ownership and permissions
+COPY --chown=appuser:appgroup --chmod=755 . .
 
 # Build the application
 RUN mvn clean package -DskipTests
