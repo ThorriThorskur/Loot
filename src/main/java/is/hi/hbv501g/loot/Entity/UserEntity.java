@@ -1,7 +1,6 @@
 package is.hi.hbv501g.loot.Entity;
 
 import jakarta.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +13,8 @@ public class UserEntity {
     private String username;
     private String password;
 
+    private String role; // Role field to support Spring Security (e.g., "USER" or "ADMIN")
+
     @Lob
     @Basic(fetch = FetchType.LAZY)
     @Column(length = 1000000) // Increase the length to handle larger data (e.g., 1 MB)
@@ -22,7 +23,6 @@ public class UserEntity {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "inventory_id", referencedColumnName = "id")
     private Inventory inventory;
-
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Deck> decks = new ArrayList<>();
@@ -33,10 +33,11 @@ public class UserEntity {
     }
 
     // Constructor with parameters
-    public UserEntity(String name, String password) {
-        this.username = name;
+    public UserEntity(String username, String password) {
+        this.username = username;
         this.password = password;
-        this.inventory = new Inventory(name + "'s Inventory");
+        this.inventory = new Inventory(username + "'s Inventory");
+        this.role = "USER"; // Default role
     }
 
     // Getters and setters
@@ -60,6 +61,14 @@ public class UserEntity {
         this.password = password;
     }
 
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     public Inventory getInventory() {
         return inventory;
     }
@@ -76,17 +85,17 @@ public class UserEntity {
         this.decks = decks;
     }
 
-    // Utility method to add a deck to the user
-    public void addDeck(Deck deck) {
-        deck.setUser(this);
-        this.decks.add(deck);
-    }
-
     public byte[] getProfilePicture() {
         return profilePicture;
     }
 
     public void setProfilePicture(byte[] profilePicture) {
         this.profilePicture = profilePicture;
+    }
+
+    // Utility method to add a deck to the user
+    public void addDeck(Deck deck) {
+        deck.setUser(this);
+        this.decks.add(deck);
     }
 }

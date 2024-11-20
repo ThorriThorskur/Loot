@@ -4,20 +4,23 @@ import is.hi.hbv501g.loot.Entity.Inventory;
 import is.hi.hbv501g.loot.Entity.UserEntity;
 import is.hi.hbv501g.loot.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private InventoryService inventoryService;
-
 
     public List<UserEntity> findAll() {
         return userRepository.findAll();
@@ -35,28 +38,37 @@ public class UserService {
         return userRepository.findByUsername(username).isPresent();
     }
 
-    public UserEntity save(UserEntity user) {
-        // Save associated inventory if it exists
+    public void save(UserEntity user) {
         Inventory inventory = user.getInventory();
         if (inventory != null) {
             inventoryService.save(inventory);
         }
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
     public void deleteById(Long id) {
         Optional<UserEntity> userOptional = userRepository.findById(id);
         if (userOptional.isPresent()) {
             UserEntity user = userOptional.get();
-
-            // Clear inventory cards first to avoid foreign key issues
             if (user.getInventory() != null) {
                 user.getInventory().getInventoryCards().clear();
             }
-
-            // Delete the user
             userRepository.deleteById(id);
         }
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<UserEntity> userEntityOptional = userRepository.findByUsername(username);
+        if (userEntityOptional.isEmpty()) {
+            throw new UsernameNotFoundException("User not found with username: " + username);
+        }
+        UserEntity userEntity = userEntityOptional.get();
+
+        return User.builder()
+                .username(userEntity.getUsername())
+                .password(userEntity.getPassword())
+                .roles(userEntity.getRole()) // Use the role field
+                .build();
+    }
 }
