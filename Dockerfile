@@ -1,6 +1,7 @@
 # Use an official OpenJDK image as the base
 FROM openjdk:17-jdk-slim
 
+
 # Set environment variables for Maven
 ENV MAVEN_VERSION=3.8.8
 ENV MAVEN_HOME=/usr/share/maven
@@ -24,8 +25,10 @@ COPY --chown=appuser:appgroup --chmod=755 . .
 # Build the application
 RUN mvn clean package -DskipTests
 
-# Expose the application's port
+# Expose the application's port \
 EXPOSE 8080
+server.port=${PORT:8080}
+
 
 # Run the application
 CMD ["java", "-jar", "target/loot-1.0.0.jar"]
