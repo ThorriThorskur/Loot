@@ -2,7 +2,7 @@
 FROM openjdk:17-jdk-slim
 
 # Set environment variables for Maven
-ENV MAVEN_VERSION=3.9.4
+ENV MAVEN_VERSION=4.0.0-alpha-13
 ENV MAVEN_HOME=/usr/share/maven
 ENV PATH="$MAVEN_HOME/bin:$PATH"
 
@@ -28,4 +28,4 @@ RUN mvn clean package -DskipTests
 EXPOSE 8080
 
 # Run the application
-CMD ["java", "-jar", "target/Loot-0.0.1.jar"]
+CMD ["java", "-jar", "target/loot-1.0.0.jar"]
