@@ -2,7 +2,7 @@
 FROM openjdk:17-jdk-slim
 
 # Set environment variables for Maven
-ENV MAVEN_VERSION=4.0.0-alpha-13
+ENV MAVEN_VERSION=4.0.0
 ENV MAVEN_HOME=/usr/share/maven
 ENV PATH="$MAVEN_HOME/bin:$PATH"
 
