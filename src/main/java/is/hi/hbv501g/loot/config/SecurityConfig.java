@@ -14,7 +14,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/register", "/", "/**").permitAll() // Allow access to all resources in static folder
+                        .requestMatchers("/login", "/register", "/", "/css/**", "/js/**", "/images/**").permitAll() // Public endpoints and static resources
                         .anyRequest().authenticated() // All other pages require authentication
                 )
                 .formLogin(form -> form
@@ -36,4 +36,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
-
