@@ -110,17 +110,18 @@
         <!-- Basic query input (optional) -->
         <label for="query">Card Name or Keyword:</label>
         <input type="text" id="query" name="query" placeholder="Enter card name or keyword" />
-
-        <!-- Dropdown for mana color -->
-        <label for="color">Mana Color:</label>
-        <select id="color" name="color">
-            <option value="">Select Mana Color</option>
-            <option value="W">White</option>
-            <option value="U">Blue</option>
-            <option value="B">Black</option>
-            <option value="R">Red</option>
-            <option value="G">Green</option>
-        </select>
+        <!-- Mana checkbox hehe -->
+        <fieldset>
+            <legend>Mana color:</legend>
+            <div class="checkbox-group">
+                <label><input type="checkbox" name="color" value="w" /> White</label>
+                <label><input type="checkbox" name="color" value="u" /> Blue</label>
+                <label><input type="checkbox" name="color" value="r" /> Red</label>
+                <label><input type="checkbox" name="color" value="b" /> Black</label>
+                <label><input type="checkbox" name="color" value="g" /> Green</label>
+                <label><input type="checkbox" name="color" value="c" /> Colorless</label>
+            </div>
+        </fieldset>
 
         <!-- Dropdown for card type -->
         <select id="type" name="type">
@@ -133,15 +134,16 @@
             <option th:each="set : ${sets}" th:value="${set['code']}" th:text="${set['name']} + ' (' + ${set['code']} + ')'"></option>
         </select>
 
-        <!-- Dropdown for card rarity -->
-        <label for="rarity">Card Rarity:</label>
-        <select id="rarity" name="rarity">
-            <option value="">Select Rarity</option>
-            <option value="common">Common</option>
-            <option value="uncommon">Uncommon</option>
-            <option value="rare">Rare</option>
-            <option value="mythic">Mythic</option>
-        </select>
+        <!-- Checkboxes for card rarity -->
+        <fieldset>
+            <legend>Card Rarity:</legend>
+            <div class="checkbox-group">
+                <label><input type="checkbox" name="rarity" value="common" /> Common</label>
+                <label><input type="checkbox" name="rarity" value="uncommon" /> Uncommon</label>
+                <label><input type="checkbox" name="rarity" value="rare" /> Rare</label>
+                <label><input type="checkbox" name="rarity" value="mythic" /> Mythic</label>
+            </div>
+        </fieldset>
 
         <!-- Checkbox group for additional filters -->
         <div class="checkbox-group">

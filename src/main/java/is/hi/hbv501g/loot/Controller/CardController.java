@@ -103,34 +103,39 @@ public class CardController {
             @RequestParam(value = "isLand", required = false) Boolean isLand,
             Model model, HttpSession session) {
 
-        StringBuilder queryBuilder = new StringBuilder();
+        StringBuilder urlBuilder = new StringBuilder("https://api.scryfall.com/cards/search?q=");
+        if (!query.trim().isEmpty()) urlBuilder.append(query.trim());
+        if (type != null && !type.isEmpty()) urlBuilder.append("+t:").append(type);
+        if (set != null && !set.isEmpty()) urlBuilder.append("+e:").append(set);
+        if (color != null && !color.isEmpty()) {
+            urlBuilder.append("+c:");
+            urlBuilder.append(color);
 
-        if (!query.trim().isEmpty()) {
-            queryBuilder.append(query.trim());
-        } else {
-            queryBuilder.append("*");
         }
-        if (type != null && !type.isEmpty()) queryBuilder.append(" t:").append(type);
-        if (set != null && !set.isEmpty()) queryBuilder.append(" e:").append(set);
-        if (color != null && !color.isEmpty()) queryBuilder.append(" c:").append(color);
+
+        // Process multiple rarity values
         if (rarity != null && !rarity.isEmpty()) {
-            queryBuilder.append(" (");
+            urlBuilder.append("+(");
             for (int i = 0; i < rarity.size(); i++) {
-                if (i > 0) queryBuilder.append(" OR ");
-                queryBuilder.append("r:").append(rarity.get(i));
+                urlBuilder.append("r:");
+                urlBuilder.append(rarity.get(i));
+                System.out.println(urlBuilder.toString());
+                if(i != rarity.size() - 1) {
+                    urlBuilder.append("+or+");
+                }
             }
-            queryBuilder.append(")");
+            urlBuilder.append(")");
         }
-        if (isLegendary != null && isLegendary) queryBuilder.append(" t:legendary");
-        if (isLand != null && isLand) queryBuilder.append(" t:land");
 
-        String encodedQuery = URLEncoder.encode(queryBuilder.toString(), StandardCharsets.UTF_8);
-
-        String url = "https://api.scryfall.com/cards/search?q=" + encodedQuery;
+        if (isLegendary != null && isLegendary) urlBuilder.append("+t:legendary");
+        if (isLand != null && isLand) {
+            urlBuilder.append("+id:").append(color);
+            urlBuilder.append("+t:land");
+        }
 
         try {
             Thread.sleep(REQUEST_DELAY_MS);
-            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+            Map<String, Object> response = restTemplate.getForObject(urlBuilder.toString(), Map.class);
             List<Card> cards = new ArrayList<>();
             if (response != null && response.containsKey("data")) {
                 List<Map<String, Object>> data = (List<Map<String, Object>>) response.get("data");
@@ -145,13 +150,14 @@ public class CardController {
 
             model.addAttribute("totalPages", totalPages);
             model.addAttribute("currentPage", 1);
-
+            System.out.println(urlBuilder.toString());
             return showPaginatedResults(1, model, session);
 
         } catch (HttpClientErrorException | InterruptedException e) {
             handleHttpClientErrorException(e, model);
         }
 
+        System.out.println(urlBuilder.toString());
         return "results";
     }
 
