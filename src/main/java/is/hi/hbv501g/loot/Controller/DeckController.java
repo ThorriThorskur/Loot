@@ -11,8 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,7 +38,10 @@ public class DeckController {
      * @return The view template for displaying the deck.
      */
     @GetMapping("/user/{userId}/deck/{deckId}")
-    public String viewDeck(@PathVariable Long userId, @PathVariable Long deckId, @RequestParam(value = "color", required = false) String color, @RequestParam(value = "type", required = false) String type, Model model) {
+    public String viewDeck(
+            @PathVariable Long userId,
+            @PathVariable Long deckId,
+            Model model) {
         Optional<UserEntity> userOptional = userService.findById(userId);
         if (!userOptional.isPresent()) {
             model.addAttribute("error", "User not found.");
@@ -53,34 +59,39 @@ public class DeckController {
             return "error";
         }
 
-        List<DeckCard> deckCards;
-
-        // If there are filters, apply them
-        if ((color != null && !color.isEmpty()) || (type != null && !type.isEmpty())) {
-            deckCards = deck.getDeckCards().stream()
-                    .filter(deckCard -> {
-                        boolean matches = true;
-
-                        if (color != null && !color.isEmpty()) {
-                            matches &= deckCard.getCard().getManaCost() != null && deckCard.getCard().getManaCost().contains(color);
-                        }
-                        if (type != null && !type.isEmpty()) {
-                            matches &= deckCard.getCard().getTypeLine() != null && deckCard.getCard().getTypeLine().toLowerCase().contains(type.toLowerCase());
-                        }
-
-                        return matches;
-                    })
-                    .collect(Collectors.toList());
-        } else {
-            // If no filters, use the entire list
-            deckCards = deck.getDeckCards();
-        }
+        String base64Picture = deck.getPicture() != null
+                ? Base64.getEncoder().encodeToString(deck.getPicture())
+                : null;
 
         model.addAttribute("user", user);
         model.addAttribute("deck", deck);
-        model.addAttribute("deckCards", deckCards); // Add the complete or filtered list to the model
-        return "user_deck"; // This is the view template for displaying the deck
+        model.addAttribute("base64Picture", base64Picture);
+
+        return "user_deck";
     }
+
+
+
+    private List<DeckCard> filterDeckCards(Deck deck, String color, String type) {
+        return deck.getDeckCards().stream()
+                .filter(deckCard -> {
+                    Card card = deckCard.getCard();
+                    boolean matches = true;
+
+
+                    if (color != null && !color.isEmpty()) {
+                        matches &= card.getManaCost() != null && card.getManaCost().contains(color);
+                    }
+
+                    if (type != null && !type.isEmpty()) {
+                        matches &= card.getTypeLine() != null && card.getTypeLine().toLowerCase().contains(type.toLowerCase());
+                    }
+
+                    return matches;
+                })
+                .collect(Collectors.toList());
+    }
+
 
     /**
      * Adds a card to the user's deck.
@@ -340,6 +351,69 @@ public class DeckController {
 
         return "redirect:/user/" + userId + "/inventory"; // Redirect back to the user's inventory
     }
+
+    @PostMapping("/user/{userId}/deck/{deckId}/uploadPicture")
+    public String uploadDeckPicture(
+            @PathVariable Long userId,
+            @PathVariable Long deckId,
+            @RequestParam("deckPicture") MultipartFile deckPicture,
+            Model model) {
+        Optional<UserEntity> userOptional = userService.findById(userId);
+        if (!userOptional.isPresent()) {
+            model.addAttribute("error", "User not found.");
+            return "error";
+        }
+
+        UserEntity user = userOptional.get();
+        Deck deck = user.getDecks().stream()
+                .filter(d -> d.getId().equals(deckId))
+                .findFirst()
+                .orElse(null);
+
+        if (deck == null) {
+            model.addAttribute("error", "Deck not found.");
+            return "error";
+        }
+
+        try {
+            deck.setPicture(deckPicture.getBytes());
+            userService.save(user); // Assuming deck is saved via user
+        } catch (IOException e) {
+            model.addAttribute("error", "Failed to upload picture.");
+            return "error";
+        }
+
+        return "redirect:/user/" + userId + "/deck/" + deckId;
+    }
+
+    @PostMapping("/user/{userId}/deck/{deckId}/removePicture")
+    public String removeDeckPicture(
+            @PathVariable Long userId,
+            @PathVariable Long deckId,
+            Model model) {
+        Optional<UserEntity> userOptional = userService.findById(userId);
+        if (!userOptional.isPresent()) {
+            model.addAttribute("error", "User not found.");
+            return "error";
+        }
+
+        UserEntity user = userOptional.get();
+        Deck deck = user.getDecks().stream()
+                .filter(d -> d.getId().equals(deckId))
+                .findFirst()
+                .orElse(null);
+
+        if (deck == null) {
+            model.addAttribute("error", "Deck not found.");
+            return "error";
+        }
+
+        deck.setPicture(null);
+        userService.save(user); // Assuming deck is saved via user
+
+        return "redirect:/user/" + userId + "/deck/" + deckId;
+    }
+
 
 
 
