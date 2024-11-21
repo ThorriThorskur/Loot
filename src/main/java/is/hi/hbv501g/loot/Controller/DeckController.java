@@ -8,6 +8,8 @@ import is.hi.hbv501g.loot.Service.CardService;
 import is.hi.hbv501g.loot.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -32,17 +34,16 @@ public class DeckController {
     /**
      * Displays the user's deck.
      *
-     * @param userId  The ID of the user.
      * @param deckId  The ID of the deck.
      * @param model   The model to pass data to the view.
      * @return The view template for displaying the deck.
      */
-    @GetMapping("/user/{userId}/deck/{deckId}")
+    @GetMapping("/user/deck/{deckId}")
     public String viewDeck(
-            @PathVariable Long userId,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long deckId,
             Model model) {
-        Optional<UserEntity> userOptional = userService.findById(userId);
+        Optional<UserEntity> userOptional = userService.findByUsername(userDetails.getUsername());
         if (!userOptional.isPresent()) {
             model.addAttribute("error", "User not found.");
             return "error";
@@ -97,13 +98,12 @@ public class DeckController {
      * Adds a card to the user's deck.
      *
      * @param cardId  The ID of the card to add.
-     * @param userId  The ID of the user.
      * @param model   The model to pass data to the view.
      * @return Redirects to the user's inventory page.
      */
     @PostMapping("/addCardToDeck")
-    public String addCardToDeck(@RequestParam("cardId") String cardId, @RequestParam("userId") Long userId, Model model) {
-        Optional<UserEntity> userOptional = userService.findById(userId);
+    public String addCardToDeck(@RequestParam("cardId") String cardId, @AuthenticationPrincipal UserDetails userDetails, Model model) {
+        Optional<UserEntity> userOptional = userService.findByUsername(userDetails.getUsername());
         if (!userOptional.isPresent()) {
             model.addAttribute("error", "User not found.");
             return "error";
@@ -126,7 +126,7 @@ public class DeckController {
             userService.save(user);
         }
 
-        return "redirect:/user/" + userId + "/inventory";
+        return "redirect:/user/inventory";
     }
 
     /**
@@ -137,8 +137,8 @@ public class DeckController {
      * @return Redirects to the user's inventory page.
      */
     @PostMapping("/createDeck")
-    public String createDeck(@RequestParam("userId") Long userId, Model model) {
-        Optional<UserEntity> userOptional = userService.findById(userId);
+    public String createDeck(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        Optional<UserEntity> userOptional = userService.findByUsername(userDetails.getUsername());
         if (!userOptional.isPresent()) {
             model.addAttribute("error", "User not found.");
             return "error";
@@ -153,7 +153,7 @@ public class DeckController {
             userService.save(user);
         }
 
-        return "redirect:/user/" + userId + "/inventory";
+        return "redirect:/user/inventory";
     }
 
     /**
@@ -165,9 +165,9 @@ public class DeckController {
      * @param model   The model to pass data to the view.
      * @return Redirects to the deck page.
      */
-    @PostMapping("/user/{userId}/deck/{deckId}/removeCard")
-    public String removeCardFromDeck(@PathVariable Long userId, @PathVariable Long deckId, @RequestParam("cardId") String cardId, Model model) {
-        Optional<UserEntity> userOptional = userService.findById(userId);
+    @PostMapping("/user/deck/{deckId}/removeCard")
+    public String removeCardFromDeck(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long deckId, @RequestParam("cardId") String cardId, Model model) {
+        Optional<UserEntity> userOptional = userService.findByUsername(userDetails.getUsername());
         if (!userOptional.isPresent()) {
             model.addAttribute("error", "User not found.");
             return "error";
@@ -198,20 +198,19 @@ public class DeckController {
             return "error";
         }
 
-        return "redirect:/user/" + userId + "/deck/" + deckId;
+        return "redirect:/user/deck/" + deckId;
     }
 
     /**
      * Verifies if the deck has at least 5 cards.
      *
-     * @param userId  The ID of the user.
      * @param deckId  The ID of the deck.
      * @param model   The model to pass data to the view.
      * @return The view template for the deck with the verification message.
      */
-    @PostMapping("/user/{userId}/deck/{deckId}/verify")
-    public String verifyDeck(@PathVariable Long userId, @PathVariable Long deckId, Model model) {
-        Optional<UserEntity> userOptional = userService.findById(userId);
+    @PostMapping("/user/deck/{deckId}/verify")
+    public String verifyDeck(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long deckId, Model model) {
+        Optional<UserEntity> userOptional = userService.findByUsername(userDetails.getUsername());
         if (!userOptional.isPresent()) {
             model.addAttribute("error", "User not found.");
             return "error";
@@ -256,9 +255,9 @@ public class DeckController {
      * @param model The model to pass data to the view.
      * @return The view template for displaying the filtered deck.
      */
-    @GetMapping("/user/{userId}/deck/{deckId}/search")
+    @GetMapping("/user/deck/{deckId}/search")
     public String searchDeck(
-            @PathVariable Long userId,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long deckId,
             @RequestParam(value = "query", required = false) String query,
             @RequestParam(value = "color", required = false) String color,
@@ -268,7 +267,7 @@ public class DeckController {
             @RequestParam(value = "isLand", required = false) Boolean isLand,
             Model model) {
 
-        Optional<UserEntity> userOptional = userService.findById(userId);
+        Optional<UserEntity> userOptional = userService.findByUsername(userDetails.getUsername());
         if (!userOptional.isPresent()) {
             model.addAttribute("error", "User not found.");
             return "error";
@@ -329,9 +328,9 @@ public class DeckController {
     }
 
 
-    @PostMapping("/user/{userId}/deleteDeck")
-    public String deleteDeck(@PathVariable Long userId, Model model) {
-        Optional<UserEntity> userOptional = userService.findById(userId);
+    @PostMapping("/user/deleteDeck")
+    public String deleteDeck(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        Optional<UserEntity> userOptional = userService.findByUsername(userDetails.getUsername());
         if (!userOptional.isPresent()) {
             model.addAttribute("error", "User not found.");
             return "error";
@@ -349,16 +348,16 @@ public class DeckController {
             return "error";
         }
 
-        return "redirect:/user/" + userId + "/inventory"; // Redirect back to the user's inventory
+        return "redirect:/user/inventory"; // Redirect back to the user's inventory
     }
 
-    @PostMapping("/user/{userId}/deck/{deckId}/uploadPicture")
+    @PostMapping("/user/deck/{deckId}/uploadPicture")
     public String uploadDeckPicture(
-            @PathVariable Long userId,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long deckId,
             @RequestParam("deckPicture") MultipartFile deckPicture,
             Model model) {
-        Optional<UserEntity> userOptional = userService.findById(userId);
+        Optional<UserEntity> userOptional = userService.findByUsername(userDetails.getUsername());
         if (!userOptional.isPresent()) {
             model.addAttribute("error", "User not found.");
             return "error";
@@ -383,15 +382,15 @@ public class DeckController {
             return "error";
         }
 
-        return "redirect:/user/" + userId + "/deck/" + deckId;
+        return "redirect:/user/deck/" + deckId;
     }
 
-    @PostMapping("/user/{userId}/deck/{deckId}/removePicture")
+    @PostMapping("/user/deck/{deckId}/removePicture")
     public String removeDeckPicture(
-            @PathVariable Long userId,
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long deckId,
             Model model) {
-        Optional<UserEntity> userOptional = userService.findById(userId);
+        Optional<UserEntity> userOptional = userService.findByUsername(userDetails.getUsername());
         if (!userOptional.isPresent()) {
             model.addAttribute("error", "User not found.");
             return "error";
@@ -411,7 +410,7 @@ public class DeckController {
         deck.setPicture(null);
         userService.save(user); // Assuming deck is saved via user
 
-        return "redirect:/user/" + userId + "/deck/" + deckId;
+        return "redirect:/user/deck/" + deckId;
     }
 
 
