@@ -155,7 +155,7 @@
 
     <div class="search-container">
         <h3>Search Your Inventory</h3>
-        <form th:action="@{/user/{userId}/inventory/search(userId=${user.id})}" method="get">
+        <form th:action="@{/user/inventory/search}" method="get">
             <label for="query">Card Name or Keyword:</label>
             <input type="text" id="query" name="query" placeholder="Enter card name or keyword" />
 
@@ -209,10 +209,12 @@
                 <p><strong>Quantity:</strong> <span th:text="${inventoryCard.count}"></span></p>
 
                 <!-- Increment Quantity Button -->
-                <form th:action="@{/user/{userId}/inventory/incrementCard(userId=${user.id})}" method="post">
+                <form th:action="@{/user/inventory/quantity}" method="post">
+
                     <input type="hidden" name="cardId" th:value="${inventoryCard.card.id}" />
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <button type="submit">Add One More</button>
+                    <p>Quantity: <input type="text" name="quantity" /></p>
+                    <button type="submit">Update</button>
+
                 </form>
 
                 <!-- Card image -->
@@ -224,7 +226,7 @@
                 </div>
 
                 <!-- Remove from Inventory Button -->
-                <form th:action="@{/user/{userId}/inventory/removeCard(userId=${user.id})}" method="post">
+                <form th:action="@{/user/inventory/removeCard}" method="post">
                     <input type="hidden" name="cardId" th:value="${inventoryCard.card.id}" />
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <button type="submit">Remove from Inventory</button>

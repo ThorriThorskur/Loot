@@ -16,7 +16,13 @@ public class UserController {
     private UserService userService;
 
 
-
+    /**
+     * Display the Dashboard where you can access all the endpoints.
+     *
+     * @param userDetails User in session details.
+     * @param model html attributes
+     * @return view index.html
+     */
     @GetMapping("/")
     public String index(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         if (userDetails == null) {
@@ -31,13 +37,25 @@ public class UserController {
     }
 
 
-
+    /**
+     * Display the user management site where you can change user details.
+     *
+     * @param model html attributes
+     * @return view user_management.html
+     */
     @GetMapping("/user_management")
     public String listUsers(Model model) {
         model.addAttribute("users", userService.findAll());
         return "user_management";
     }
 
+    /**
+     * Remove a user from the database.
+     *
+     * @param id Id of the selected user in the html
+     * @param redirectAttributes Attribute to display error or success information
+     * @return view user_management.html with success or error message
+     */
     @PostMapping("/deleteuser")
     public String deleteUser(@RequestParam("id") long id,
                              RedirectAttributes redirectAttributes) {

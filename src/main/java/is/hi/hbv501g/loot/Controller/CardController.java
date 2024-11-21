@@ -252,7 +252,7 @@ public class CardController {
         inventory.addCard(card);
         userService.save(user);
 
-        return "redirect:/user/" + user.getId() + "/inventory";
+        return "redirect:/user/inventory";
     }
 
 
