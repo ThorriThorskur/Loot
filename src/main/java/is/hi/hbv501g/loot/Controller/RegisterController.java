@@ -19,12 +19,25 @@ public class RegisterController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * Display the register site.
+     *
+     * @param model html attributes
+     * @return view register.html
+     */
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
         model.addAttribute("user", new UserEntity()); // Pass a new UserEntity to the form
         return "register"; // Render Thymeleaf template for registration
     }
 
+    /**
+     * Register a new user to the database
+     *
+     * @param user Attributes from the submission form
+     * @param model html attributes
+     * @return back to register.html if failed else login.html
+     */
     @PostMapping("/register")
     public String registerUser(@ModelAttribute("user") UserEntity user, Model model) {
         if (userService.userExists(user.getUsername())) {
