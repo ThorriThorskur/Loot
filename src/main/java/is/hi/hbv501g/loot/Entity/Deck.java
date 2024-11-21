@@ -28,6 +28,20 @@ public class Deck {
         this.user = user;
     }
 
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Column(length = 1000000)
+    private byte[] picture;
+
+    // Getters and setters
+    public byte[] getPicture() {
+        return picture;
+    }
+
+    public void setPicture(byte[] picture) {
+        this.picture = picture;
+    }
+
     // Getters and Setters
     public Long getId() {
         return id;
