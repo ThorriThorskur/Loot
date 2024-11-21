@@ -318,6 +318,31 @@ public class DeckController {
     }
 
 
+    @PostMapping("/user/{userId}/deleteDeck")
+    public String deleteDeck(@PathVariable Long userId, Model model) {
+        Optional<UserEntity> userOptional = userService.findById(userId);
+        if (!userOptional.isPresent()) {
+            model.addAttribute("error", "User not found.");
+            return "error";
+        }
+
+        UserEntity user = userOptional.get();
+
+        // Assuming a user can only have one deck
+        if (!user.getDecks().isEmpty()) {
+            Deck deck = user.getDecks().get(0); // Get the single deck
+            user.getDecks().remove(deck); // Remove it from the user's decks
+            userService.save(user); // Save the user without the deck
+        } else {
+            model.addAttribute("error", "No deck found to delete.");
+            return "error";
+        }
+
+        return "redirect:/user/" + userId + "/inventory"; // Redirect back to the user's inventory
+    }
+
+
+
 
 }
 
