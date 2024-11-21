@@ -114,7 +114,7 @@
         <span>&#128269;</span> Search Cards
     </a>
 
-    <a href="/register">
+    <a th:if="${userDetails == null}" href="/register">
         <span>&#128100;</span> Register
     </a>
 
