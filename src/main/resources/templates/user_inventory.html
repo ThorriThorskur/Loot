@@ -134,9 +134,10 @@
         <p><a th:href="@{/}">Back to Home</a></p>
     </div>
 
-    <!-- Button to go to user's deck -->
+    <!-- Check if user has a deck -->
     <div th:if="${user.decks.size()} == 0">
         <p>You have no decks.</p>
+        <!-- Create New Deck Form -->
         <form th:action="@{/createDeck}" method="post">
             <input type="hidden" name="userId" th:value="${user.id}" />
             <button type="submit">Create New Deck</button>
@@ -144,14 +145,21 @@
     </div>
 
     <div th:if="${user.decks.size()} > 0">
-        <h3>Your Decks:</h3>
+        <h3>Your Deck:</h3>
         <ul>
+            <!-- Loop through user decks -->
             <li th:each="deck : ${user.decks}">
+                <!-- View Deck Link -->
                 <a th:href="@{'/user/' + ${user.id} + '/deck/' + ${deck.id}}"
                    th:text="${deck.name}">View Deck</a>
+                <!-- Delete Deck Button -->
+                <form th:action="@{'/user/' + ${user.id} + '/deleteDeck'}" method="post" style="display:inline;">
+                    <button type="submit" onclick="return confirm('Are you sure you want to delete this deck?')">Delete</button>
+                </form>
             </li>
         </ul>
     </div>
+
 
     <div class="search-container">
         <h3>Search Your Inventory</h3>
